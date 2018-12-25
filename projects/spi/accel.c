@@ -18,14 +18,9 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* Private function prototypes -----------------------------------------------*/
-
+static void spi_init();
+static void spi_disable();
 /* Private functions ---------------------------------------------------------*/
-
-/**
-  * @brief   Main program
-  * @param  None
-  * @retval None
-  */
 
 #define PORTD_15 0x00008000
 #define PORTD_14 0x00004000
@@ -33,6 +28,64 @@
 #define PORTD_12 0x00001000
 #define PORTD_ALL 0x0000F000
 
+
+void spi_disable(){
+  while((SPI1->SR & SPI_SR_RXNE) == SPI_SR_RXNE);
+  while((SPI1->SR & SPI_SR_TXE) == SPI_SR_TXE);
+  while((SPI1->SR & SPI_SR_BSY) == SPI_SR_BSY);
+  SPI1->CR1 &= ~(SPI_CR1_SPE);
+}
+
+void spi_write(){
+
+
+
+}
+
+void spi_init(){
+
+  /* RCC Clock for SPI1 */
+  RCC->APB2ENR |=RCC_APB2ENR_SPI1EN;
+
+  /* disable the SPI first */
+  spi_disable();
+
+  /* Set the Baud Rate to FPCLK(84 MhZ)/16Mhz */
+  SPI1->CR1 &= ~(SPI_CR1_BR);
+  SPI1->CR1 |= (SPI_CR1_BR_0 | SPI_CR1_BR_1);
+
+  /* Set the Clock Polarity (CPOL) to 0x0 */
+  SPI1->CR1 &= ~(SPI_CR1_CPOL);
+
+  /* Set the Clock Phase (CPHA) to 0x0 */
+  SPI1->CR1 &= ~(SPI_CR1_CPHA);
+
+  /* Set the DataFrame size to 8-bits */
+  SPI1->CR1 &= ~(SPI_CR1_DFF);
+
+  /* Send MSB First */
+  SPI1->CR1 &= ~(SPI_CR1_LSBFIRST);
+
+  /* Slave Selection in Software */
+  SPI1->CR1 |= (SPI_CR1_SSM);
+  SPI1->CR1 |= (SPI_CR1_SSM);
+
+  /* SPI Motorola Mode */
+  SPI1->CR2 &= ~(SPI_CR2_FRF);
+
+  /* Master Selection*/
+  SPI1->CR1 |= (SPI_CR1_MSTR);
+
+  /* Enable SPI */
+  SPI1->CR1 |= (SPI_CR1_SPE);
+
+}
+
+/**
+  * @brief   Main program
+  * @param  None
+  * @retval None
+  */
 int main(void)
 {
   /*!< At this stage the microcontroller clock setting is already configured,
@@ -78,6 +131,12 @@ int main(void)
 
 
   /* Pin setup for SPI command */
+  /*
+  * PA 5 - SCK
+  * PA 6 - SDO
+  * PA 7 - SDI
+  * PE 3 - CS
+  */
   RCC->AHB1ENR |= (RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOEEN);
   // Set mode of all pins as digital output
   // 00 = digital input       01 = digital output
@@ -119,6 +178,9 @@ int main(void)
   // Since clock is 168 MHz, then 168MHz/1000 is
   // 168000 clock ticks inorder to generate an interupt every 1ms
   SysTick_Init(SystemCoreClock/1000);
+
+  /* Init SPI */
+  spi_init();
 
   /* Infinite loop */
   while (1)
