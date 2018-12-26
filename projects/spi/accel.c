@@ -16,10 +16,11 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-
 /* Private function prototypes -----------------------------------------------*/
 static void spi_init();
 static void spi_disable();
+static void spi_write(uint8_t * tx_buffer);
+static void spi_read(uint8_t * rx_buffer);
 /* Private functions ---------------------------------------------------------*/
 
 #define PORTD_15 0x00008000
@@ -29,26 +30,59 @@ static void spi_disable();
 #define PORTD_ALL 0x0000F000
 
 
+/* Disable the SPI during operation */
 void spi_disable(){
-  while((SPI1->SR & SPI_SR_RXNE) == SPI_SR_RXNE);
-  while((SPI1->SR & SPI_SR_TXE) == SPI_SR_TXE);
+  while((SPI1->SR & SPI_SR_RXNE) != SPI_SR_RXNE);
+  while((SPI1->SR & SPI_SR_TXE) != SPI_SR_TXE);
   while((SPI1->SR & SPI_SR_BSY) == SPI_SR_BSY);
   SPI1->CR1 &= ~(SPI_CR1_SPE);
 }
 
-void spi_write(){
+void spi_write(uint8_t * tx_buffer){
 
+  /*
+  *  The software must ensure that the TXE flag is set to 1 before attempting
+  *  to write to the Txbuffer. Otherwise, it overwrites the data previously
+  *  written to the Tx buffer.
+  */
+
+  while((SPI1->SR & SPI_SR_TXE) == SPI_SR_TXE);
+  SPI1->DR = tx_buffer[0];
+
+
+  while((SPI1->SR & SPI_SR_RXNE) == SPI_SR_RXNE);
+  uint8_t dummy_read = SPI1->DR;
+
+  while((SPI1->SR & SPI_SR_BSY) == SPI_SR_BSY);
+  return;
+}
+
+void spi_read(uint8_t * rx_buffer){
+
+  while((SPI1->SR & SPI_SR_TXE) == SPI_SR_TXE);
+  SPI1->DR = 0xFF; /* dummy write */
+
+  while((SPI1->SR & SPI_SR_RXNE) == SPI_SR_RXNE);
+  rx_buffer[0] = SPI1->DR;
+
+  while((SPI1->SR & SPI_SR_BSY) == SPI_SR_BSY);
+  return;
 
 
 }
+
 
 void spi_init(){
 
   /* RCC Clock for SPI1 */
   RCC->APB2ENR |=RCC_APB2ENR_SPI1EN;
 
+  /* RCC Reset SPI Registers */
+  RCC->APB2RSTR |= RCC_APB2RSTR_SPI1RST;
+  RCC->APB2RSTR &= ~(RCC_APB2RSTR_SPI1RST);
+
   /* disable the SPI first */
-  spi_disable();
+  SPI1->CR1 &= ~(SPI_CR1_SPE);
 
   /* Set the Baud Rate to FPCLK(84 MhZ)/16Mhz */
   SPI1->CR1 &= ~(SPI_CR1_BR);
