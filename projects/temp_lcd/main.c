@@ -12,51 +12,58 @@
 /* Includes ------------------------------------------------------------------*/
 #include "systick.h"
 #include "lcd.h"
-
+#include "math.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 #define ADC_TEMPERATURE_V25       760  /* mV */
 #define ADC_TEMPERATURE_AVG_SLOPE 2500 /* mV/C */
-uint16_t * temp_30 = (uint16_t *) ((uint32_t)0x1FFF7A2C);
-uint16_t * temp_110 =(uint16_t *) ((uint32_t)0x1FFF7A2E);
-uint16_t * vref_cal =(uint16_t *) 0x1FFF7A2A;
+#define NUM_SAMPLES               10
+
+const double BETA               = 3435.0;
+const double ROOM_TEMP          = 298.15;   // room temperature in Kelvin
+const double RESISTOR_ROOM_TEMP = 10000.0;
+
 uint8_t counter =0;
-uint16_t vref_value = 0;
-uint16_t temp_value = 0;
+uint16_t sample_array[10];
+double temperature = 0;
+uint16_t temperature_adc = 0;
+uint8_t ready = 0;
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
-float adc_value_to_temp(const uint16_t value) {
- /* convert reading to millivolts */
-  float conv_value=value;
-  conv_value *= 3;
-  conv_value /= 4096; //Reading in mV
-  //conv_value /= 1000.0; //Reading in Volts
-  conv_value -= 0.760; // Subtract the reference voltage at 25°C
-  conv_value /= .0025; // Divide by slope 2.5mV
-  conv_value += 25.0; // Add the 25°C
-  //conv_value -= 11.0; // Add the 25°C
-return conv_value;
+double adc_value_to_temp(const uint16_t value) {
+
+  double rThermistor = ((4096/(double) value) - 1);
+  rThermistor = 10000/rThermistor;
+
+  double steinhart;
+  steinhart = rThermistor / RESISTOR_ROOM_TEMP;     // (R/Ro)
+  steinhart = log(steinhart);                  // ln(R/Ro)
+  steinhart /= BETA;                   // 1/B * ln(R/Ro)
+  steinhart += 1.0 / (ROOM_TEMP); // + (1/To)
+  steinhart = 1.0 / steinhart;                 // Invert
+  steinhart -= 273.15;                         // convert to C
+
+  return steinhart;
 }
 
-float adc_steps_per_volt(const uint16_t vref_value) {
- return 3.0*(*vref_cal/(float)vref_value);
-}
 
 void ADC_IRQHandler(void){
   if((ADC1->SR & ADC_SR_EOC) == ADC_SR_EOC){
     /* acknowledge interrupt */
-    uint16_t value;
-
-    value = ADC1->DR;
-    if(counter % 2 == 0) {
-      temp_value = value;
-    } else {
-      vref_value = value;
-    }
+    sample_array[counter] = ADC1->DR;
     counter++;
+    if(counter == 9){
+      int sum=0, i;
+      for( i=0;i<NUM_SAMPLES;i++){
+        sum += sample_array[i];
+      }
+      temperature_adc = sum / NUM_SAMPLES;
+      counter =0;
+      ready = 1;
+    }
 
   }
 
@@ -159,28 +166,6 @@ void ADCx_Init(ADC_TypeDef * ADCx){
 
 }
 
-uint16_t adc_read(ADC_TypeDef * ADCx){
-
-  /* Configure Channel For requested channel */
-  ADCx->SQR3 &= ~(ADC_SQR3_SQ1);
-  ADCx->SQR3 |= (ADC_SQR3_SQ1_3|ADC_SQR3_SQ1_1|ADC_SQR3_SQ1_0); // Channel 16 for temp sensor on stm32f4 disc
-  // Sample Time is 480 cycles
-  ADCx->SMPR1 |= ADC_SMPR1_SMP11;
-
-
-  /* Enable the selected ADC conversion for regular group */
-  ADCx->CR2 |= (uint32_t)ADC_CR2_SWSTART;
-
-  /* wait for end of conversion */
-  while((ADCx->SR & ADC_SR_EOC) == 0);
-
- return (uint16_t) ADCx->DR ;
-
-
-
-}
-
-
 /**
   * @brief   Main program
   * @param  None
@@ -204,13 +189,22 @@ int main(void)
  // Set mode of all pins as digital output
   // 00 = digital input         01 = digital output
   // 10 = alternate function    11 = analog (default)
-  GPIOD->MODER &=~(GPIO_MODER_MODE6|GPIO_MODER_MODE4
-                  | GPIO_MODER_MODE3|GPIO_MODER_MODE2
-                  | GPIO_MODER_MODE1|GPIO_MODER_MODE0);
 
-  GPIOD->MODER |=(GPIO_MODER_MODE6_0|GPIO_MODER_MODE4_0
-                  | GPIO_MODER_MODE3_0|GPIO_MODER_MODE2_0 //output
-                  | GPIO_MODER_MODE1_0|GPIO_MODER_MODE0_0); //output
+    GPIOD->MODER &=~( GPIO_MODER_MODE15 | GPIO_MODER_MODE14
+                  | GPIO_MODER_MODE13 | GPIO_MODER_MODE12
+                  | GPIO_MODER_MODE10 | GPIO_MODER_MODE9
+                  | GPIO_MODER_MODE8  | GPIO_MODER_MODE7
+                  | GPIO_MODER_MODE6  | GPIO_MODER_MODE4
+                  | GPIO_MODER_MODE3  | GPIO_MODER_MODE2
+                  | GPIO_MODER_MODE1  | GPIO_MODER_MODE0);
+
+  GPIOD->MODER |= ( GPIO_MODER_MODE15_0 |  GPIO_MODER_MODE14_0
+                  | GPIO_MODER_MODE13_0 |  GPIO_MODER_MODE12_0
+                  | GPIO_MODER_MODE10_0 | GPIO_MODER_MODE9_0
+                  | GPIO_MODER_MODE8_0  | GPIO_MODER_MODE7_0
+                  | GPIO_MODER_MODE6_0  |  GPIO_MODER_MODE4_0
+                  | GPIO_MODER_MODE3_0  |  GPIO_MODER_MODE2_0 //output
+									| GPIO_MODER_MODE1_0 | GPIO_MODER_MODE0_0); //output
 
   GPIOC->MODER &=~(GPIO_MODER_MODE1);
   GPIOC->MODER |= (GPIO_MODER_MODE1_0|GPIO_MODER_MODE1_1);
@@ -218,21 +212,38 @@ int main(void)
   // Set output tupe of all pins as push-pull
   // 0 = push-pull (default)
   // 1 = open-drain
-  GPIOD->OTYPER &= ~( GPIO_OTYPER_OT6 | GPIO_OTYPER_OT4
-                    | GPIO_OTYPER_OT3 | GPIO_OTYPER_OT2
-                    | GPIO_OTYPER_OT1 | GPIO_OTYPER_OT0);
+
+
+  GPIOD->OTYPER &= ~( GPIO_OTYPER_OT15 | GPIO_OTYPER_OT14
+                    | GPIO_OTYPER_OT13 | GPIO_OTYPER_OT12
+                    | GPIO_OTYPER_OT10 | GPIO_OTYPER_OT9
+                    | GPIO_OTYPER_OT8  | GPIO_OTYPER_OT7
+                    | GPIO_OTYPER_OT6  | GPIO_OTYPER_OT4
+                    | GPIO_OTYPER_OT3  | GPIO_OTYPER_OT2
+                    | GPIO_OTYPER_OT1  | GPIO_OTYPER_OT0);
+
+
   GPIOC->OTYPER &= ~( GPIO_OTYPER_OT1);
 
   // Set output speed of all pins as high
   // 00 = Low speed           01 = Medium speed
   // 10 = Fast speed          11 = High speed
-  GPIOD->OSPEEDR &=~(GPIO_OSPEEDR_OSPEED6|GPIO_OSPEEDR_OSPEED4
-                    | GPIO_OSPEEDR_OSPEED3|GPIO_OSPEEDR_OSPEED2
-                    | GPIO_OSPEEDR_OSPEED1|GPIO_OSPEEDR_OSPEED0); /* Configure as high speed */
+   GPIOD->OSPEEDR &=~( GPIO_OSPEEDR_OSPEED15 | GPIO_OSPEEDR_OSPEED14
+                    | GPIO_OSPEEDR_OSPEED13 | GPIO_OSPEEDR_OSPEED12
+                    | GPIO_OSPEEDR_OSPEED10 | GPIO_OSPEEDR_OSPEED9
+                    | GPIO_OSPEEDR_OSPEED8  | GPIO_OSPEEDR_OSPEED7
+                    | GPIO_OSPEEDR_OSPEED6  | GPIO_OSPEEDR_OSPEED4
+                    | GPIO_OSPEEDR_OSPEED3  | GPIO_OSPEEDR_OSPEED2
+                    | GPIO_OSPEEDR_OSPEED1  | GPIO_OSPEEDR_OSPEED0); /* Configure as high speed */
 
-  GPIOD->OSPEEDR |=(GPIO_OSPEEDR_OSPEED6|GPIO_OSPEEDR_OSPEED4
-                    | GPIO_OSPEEDR_OSPEED3|GPIO_OSPEEDR_OSPEED2
-                    | GPIO_OSPEEDR_OSPEED1|GPIO_OSPEEDR_OSPEED0); /* Configure as high speed */
+  GPIOD->OSPEEDR |= ( GPIO_OSPEEDR_OSPEED15 | GPIO_OSPEEDR_OSPEED14
+                    | GPIO_OSPEEDR_OSPEED13 | GPIO_OSPEEDR_OSPEED12
+                    | GPIO_OSPEEDR_OSPEED10 | GPIO_OSPEEDR_OSPEED9
+                    | GPIO_OSPEEDR_OSPEED8  | GPIO_OSPEEDR_OSPEED7
+                    | GPIO_OSPEEDR_OSPEED6  | GPIO_OSPEEDR_OSPEED4
+                    | GPIO_OSPEEDR_OSPEED3  | GPIO_OSPEEDR_OSPEED2
+                    | GPIO_OSPEEDR_OSPEED1  | GPIO_OSPEEDR_OSPEED0); /* Configure as high speed */
+
 
   GPIOC->OSPEEDR &=~(GPIO_OSPEEDR_OSPEED1); /* Configure as high speed */
 
@@ -242,9 +253,15 @@ int main(void)
   // Set all pins as no pull-up, no pull-down
   // 00 = no pull-up, no pull-down    01 = pull-up
   // 10 = pull-down,                  11 = reserved
-  GPIOD->PUPDR &= ~(GPIO_PUPDR_PUPD6|GPIO_PUPDR_PUPD4 /*no pul-up, no pull-down*/
-                    |GPIO_PUPDR_PUPD3|GPIO_PUPDR_PUPD2
-                    |GPIO_PUPDR_PUPD1|GPIO_PUPDR_PUPD0);
+
+  GPIOD->PUPDR &= ~(GPIO_PUPDR_PUPD15 | GPIO_PUPDR_PUPD14
+                  | GPIO_PUPDR_PUPD13 | GPIO_PUPDR_PUPD12
+                  | GPIO_PUPDR_PUPD10  | GPIO_PUPDR_PUPD9 /*no pul-up, no pull-down*/
+                  | GPIO_PUPDR_PUPD8  | GPIO_PUPDR_PUPD7 /*no pul-up, no pull-down*/
+                  | GPIO_PUPDR_PUPD6  | GPIO_PUPDR_PUPD4 /*no pul-up, no pull-down*/
+                  | GPIO_PUPDR_PUPD3  | GPIO_PUPDR_PUPD2
+                  | GPIO_PUPDR_PUPD1  | GPIO_PUPDR_PUPD0);
+
 
   GPIOC->PUPDR &= ~(GPIO_PUPDR_PUPD1);
 
@@ -259,11 +276,11 @@ int main(void)
   ADCx_Init(ADC1);
 
   LCD rgb_lcd;
-  LCD_init(&rgb_lcd,GPIOD,0,0,1,0,0,0,0,2,3,4,6,4,20,LCD_4BITMODE,LCD_5x8DOTS);
+  LCD_init(&rgb_lcd,GPIOD,0,0,1,2,3,4,6,7,8,9,10,4,20,LCD_8BITMODE,LCD_5x8DOTS);
   LCD_setRowOffsets(&rgb_lcd,0x00,0x40,0x14,0x54);
   LCD_clear(&rgb_lcd);
-  LCD_print(&rgb_lcd, "I AM HERE");
-  Delay(5000);
+  LCD_print(&rgb_lcd, "Periphery Setup Complete");
+  Delay(1000);
 
   LCD_clear(&rgb_lcd);
   //LCD_home(&rgb_lcd);
@@ -273,12 +290,13 @@ int main(void)
 
   while(1){
     /* Enable the selected ADC conversion for regular group */
-    while(counter <= 1); // Wait till conversion is done
-    counter = 0;
-    float temp = adc_value_to_temp(temp_value);
-    LCD_print(&rgb_lcd, "ADC TEMP: %4d", temp_value);
+    while(!ready); // Wait till conversion is done
+    ready = 0;
+    //float temp = adc_value_to_temp(temperature_adc);
+    LCD_print(&rgb_lcd, "ADC TEMP: %4d", temperature_adc);
+    float temp_thermistor = adc_value_to_temp(temperature_adc);
     LCD_setCursor(&rgb_lcd, 0,1);
-    LCD_print(&rgb_lcd,"TEMP: %4.2f\xDF%c", temp,'C');
+    LCD_print(&rgb_lcd,"TEMP: %4.2f\xDF%1c", temp_thermistor,'C');
 
     LCD_home(&rgb_lcd);
 
