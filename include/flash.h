@@ -13,7 +13,7 @@
 #define __FLASH_H
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f4xx.h"
+#include "stm32f407xx.h"
 #include "system_stm32f4xx.h"
 #include "clock.h"
 #include "string.h"

@@ -13,7 +13,7 @@
 #define __HELPER_H
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f4xx.h"
+#include "stm32f407xx.h"
 #include "math.h"
 /* Exported types ------------------------------------------------------------*/
 typedef struct RangeMap{
