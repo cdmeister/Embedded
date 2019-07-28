@@ -57,5 +57,5 @@ extern uint8_t GetAPB2Prescaler(void);
 extern uint32_t GetHCLK(void);
 extern uint32_t GetPCLK1(void);
 extern uint32_t GetPCLK2(void);
-
+extern uint32_t GetSystemClock(void);
 #endif /* __CLOCK_H */

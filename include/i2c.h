@@ -1,28 +1,24 @@
 /**
   ******************************************************************************
-  * @file    CS43L22
+  * @file    helper.h
   * @author  Moeiz Riaz
   * @version V1.0.0
-  * @date    14-JULY-2019
-  * @brief   Header for CS43L22
+  * @date    2-July-2019
+  * @brief   i2c module
   ******************************************************************************
 */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __CS43L22_H
-#define __CS43L22_H
+#ifndef __I2C_H
+#define __I2C_H
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32f407xx.h"
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-
-void CS43L22_init();
-void CS43L22_writeReg();
-void CS43L22_readReg();
-static void CS43L22_GPIO_init();
-static void CS43L22_I2C_init();
-static void CS43L22_I2S_init();
-
-#endif /* __CS43L22_H */
+inline void I2C_clock_init(I2C_TypeDef * I2Cx);
+inline void I2C_CR1_mode(I2C_TypeDef * I2Cx);
+inline void I2C_OAR_init(I2C_TypeDef * I2Cx);
+#endif /* __I2C_H */

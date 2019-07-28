@@ -316,3 +316,6 @@ uint32_t GetPCLK2(void){
 
 }
 
+uint32_t GetSystemClock(void){
+  return SystemCoreClock;
+}
