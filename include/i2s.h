@@ -18,5 +18,5 @@
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-inline void I2S_init(SPI_TypeDef * I2Sx, uint32_t AudioFrequency);
+inline void I2S_init(SPI_TypeDef * I2Sx);
 #endif /* __I2S_H */

@@ -40,68 +40,9 @@ int main(void)
         system_stm32f4xx.c file
      */
 
-  /* Enable Clock */
-  RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
-
-
-  // Set mode of all pins as digital output
-  // 00 = digital input       01 = digital output
-  // 10 = alternate function  11 = analog (default)
-  GPIOD->MODER &= ~(GPIO_MODER_MODE12 | GPIO_MODER_MODE13
-                   | GPIO_MODER_MODE14 | GPIO_MODER_MODE15); /* Clear mode bits */
-  GPIOD->MODER |= (GPIO_MODER_MODE12_0 | GPIO_MODER_MODE13_0
-                   | GPIO_MODER_MODE14_0 | GPIO_MODER_MODE15_0);/* LED 5-8 are on GPIOD Pins 12-15 */
-
-  // Set output type of all pins as push-pull
-  // 0 = push-pull (default)
-  // 1 = open-drain
-  GPIOD->OTYPER &= ~(GPIO_OTYPER_OT12 | GPIO_OTYPER_OT13 |
-                   GPIO_OTYPER_OT14 | GPIO_OTYPER_OT15); /*Configure as output open-drain */
-
-  // Set output speed of all pins as high
-  // 00 = Low speed           01 = Medium speed
-  // 10 = Fast speed          11 = High speed
-  GPIOD->OSPEEDR &=~(GPIO_OSPEEDR_OSPEED12 | GPIO_OSPEEDR_OSPEED13 | /* Configure as high speed */
-                    GPIO_OSPEEDR_OSPEED14 | GPIO_OSPEEDR_OSPEED15); /* Configure as high speed */
-  GPIOD->OSPEEDR |= (GPIO_OSPEEDR_OSPEED12 | GPIO_OSPEEDR_OSPEED13 |
-                    GPIO_OSPEEDR_OSPEED14 | GPIO_OSPEEDR_OSPEED15);
-
-  // Set all pins as no pull-up, no pull-down
-  // 00 = no pull-up, no pull-down    01 = pull-up
-  // 10 = pull-down,                  11 = reserved
-  GPIOD->PUPDR &= ~(GPIO_PUPDR_PUPD12 | GPIO_PUPDR_PUPD13
-                  | GPIO_PUPDR_PUPD14 | GPIO_PUPDR_PUPD15); /*no pul-up, no pull-down*/
-
-  unsigned int delay =0;
-
-  /* Infinite loop */
+   /* Infinite loop */
   while (1)
-  {
-    GPIOD->ODR |=PORTD_12;
-    for(delay= 0; delay < 1066667; delay++);
-    GPIOD->ODR &=~PORTD_12;
-    for(delay= 0; delay < 1066667; delay++);
-    GPIOD->ODR |=PORTD_13;
-    for(delay= 0; delay < 1066667; delay++);
-    GPIOD->ODR &=~PORTD_13;
-    for(delay= 0; delay < 1066667; delay++);
-    GPIOD->ODR |=PORTD_14;
-    for(delay= 0; delay < 1066667; delay++);
-    GPIOD->ODR &=~PORTD_14;
-    for(delay= 0; delay < 1066667; delay++);
-    GPIOD->ODR |=PORTD_15;
-    for(delay= 0; delay < 1066667; delay++);
-    GPIOD->ODR &=~PORTD_15;
-
-    for(delay= 0; delay < 1066667; delay++);
-
-    GPIOD->ODR |=PORTD_ALL;
-
-    for(delay= 0; delay < 1066667; delay++);
-    GPIOD->ODR &=~PORTD_ALL;
-    for(delay= 0; delay < 1066667; delay++);
-
-  }
+  {}
 
   return 0;
 }

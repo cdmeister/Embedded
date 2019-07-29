@@ -380,7 +380,7 @@ static void SetSysClock(void){
     RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLQ_Msk);
     RCC->PLLCFGR |= (PLL_Q << RCC_PLLCFGR_PLLQ_Pos); /*PLL_Q*/
 
-    /* Select PLL Source to be HSE */
+    /* Main PLL(PLL) and audio PLL (PLLI2S) use HSE as clock source */
     RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLSRC_Msk);
     RCC->PLLCFGR |=RCC_PLLCFGR_PLLSRC_HSE;
 
