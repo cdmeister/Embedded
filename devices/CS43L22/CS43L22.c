@@ -156,9 +156,6 @@ static void CS43L22_I2C_init(){
   // Disable I2C for configuration(Espicialy for TRISE)
   I2C1->CR1 &= ~(I2C_CR1_PE);
 
-  //  For now just hard code values and figure out how to
-  //  make this more modular
-
   // Peripheral clock frequncy
   // This value must match the AHB frequency sincd I2C is conntect to AHB1 Bus
   I2C1->CR2 &= ~(I2C_CR2_FREQ);
@@ -321,4 +318,136 @@ static void CS43L22_I2S_init(){
   //       I2S is disabled.
   SPI3->IS2CFGR &= ~(SPI_I2SCFGR_CHLEN);
 
+}
+
+// RESET Pin to LOW
+void CS43L22_reset(){
+
+  GPIOD->BSRR = GPIO_BSRR_BR4;
+
+}
+
+// RESET Pin to HIGH
+void CS43L22_activate(){
+
+  GPIOD->BSRR = GPIO_BSRR_BS4;
+
+}
+
+
+void CS43L22_writeReg(uint8_t address, uint8_t data){
+
+  // START: Start generation
+  // This bit is set and cleared by software and cleared by hardware
+  // when start is sent or PE=0.
+  // In Master Mode:
+  //    0: No Start generation
+  //    1: Repeated start generation
+  // In Slave mode:
+  //    0: No Start generation
+  //    1: Start generation when the bus is free
+  I2C1->CR1 |= I2C_CR1_START;
+
+  // SB: Start bit (Master mode)
+  //    0: No Start condition
+  //    1: Start condition generated.
+  // – Set when a Start condition generated.
+  // – Cleared by software by reading the SR1 register followed by
+  // writing the DR register, or by hardware when PE=0
+  while(!(I2C1->SR & I2C_SR1_SB)){
+    // Wait for start condition to be generated
+  }
+
+  // DR[7:0] 8-bit data register
+  // Byte received or to be transmitted to the bus.
+  //  – Transmitter mode: Byte transmission starts automatically when a byte
+  //    is written in the DR register. A continuous transmit stream can be
+  //    maintained if the next data to be transmitted is put in DR once the
+  //    transmission is started (TxE=1)
+  // – Receiver mode: Received byte is copied into DR (RxNE=1). A continuous
+  //   transmit stream can be maintained if DR is read before
+  //   the next data byte is received (RxNE=1).
+  // Note: In slave mode, the address is not copied into DR.
+  // Write collision is not managed (DR can be written if TxE=0).
+  // If an ARLO event occurs on ACK pulse, the received byte is not copied into DR
+  // and so cannot be read.
+  I2C1->DR = CS43L22_address; // Send the chip address
+
+  // ADDR: Address sent (master mode)
+  // Address sent (Master)
+  //  0: No end of address transmission
+  //  1: End of address transmission
+  // – For 10-bit addressing, the bit is set after the ACK of the 2nd byte.
+  // – For 7-bit addressing, the bit is set after the ACK of the byte.
+  // Note: ADDR is not set after a NACK reception
+  while (!(I2C1 ->SR1 & I2C_SR1_ADDR )) {}// Wait for master transmitter mode.
+	volatile uint16_t dummy_read = I2C1 ->SR2; // Must read SR2 to clear ADDR bit
+
+  // TxE=1 , shift register empty, data register empty, write Data1 in DR
+  while(!(I2C1->SR1 & I2C_SR1_TXE)){}
+
+  I2C1->DR = address; // Transmit the address to write to.
+	while(!(I2C1->SR1 & I2C_SR1_TXE)){} // Wait for byte to move to shift register.
+
+
+  I2C1->DR = data; // Transmit the data of the to write to.
+
+  // After the last tranmission of data
+  while (!(I2C1 ->SR1 & I2C_SR1_BTF )){} // Wait for all bytes to finish.
+
+	I2C1 ->CR1 |= I2C_CR1_STOP; // End the transfer sequence.
+}
+
+// Reading a register is done by doing a write register sequence then
+// doing a read sequence.
+uint8_t CS43L22_readReg(uint8_t address){
+
+  // Send the START generation
+  I2C1->CR1 |= I2C_CR1_START;
+
+  while(!(I2C1->SR & I2C_SR1_SB)){
+    // Wait for start condition to be generated
+  }
+
+  I2C1->DR = CS43L22_address; // Send the chip address
+  while (!(I2C1 ->SR1 & I2C_SR1_ADDR )) {}// Wait for master transmitter mode.
+	volatile uint16_t dummy_read = I2C1 ->SR2; // Must read SR2 to clear ADDR bit
+
+  // TxE=1 , shift register empty, data register empty, write Data1 in DR
+  while(!(I2C1->SR1 & I2C_SR1_TXE)){}
+
+  I2C1->DR = address; // Transmit the address to write to.
+  // After the last tranmission of data
+  while (!(I2C1 ->SR1 & I2C_SR1_BTF )){} // Wait for all bytes to finish.
+	I2C1 ->CR1 |= I2C_CR1_STOP; // End the transfer sequence.
+
+  // Read Sequence
+  I2C1->CR1 |= I2C_CR1_START;
+   while(!(I2C1->SR & I2C_SR1_SB)){
+    // Wait for start condition to be generated
+  }
+
+  I2C1->DR = (CS43L22_address|0x1); // Send the chip address
+  while (!(I2C1 ->SR1 & I2C_SR1_ADDR )) {}// Wait for master reciver mode.
+
+  // Disable I2C to generate ACK
+  I2C1-CR1 &= ~(I2C_CR1_ACK);
+	volatile uint16_t dummy_read = I2C1 ->SR2; // Must read SR2 to clear ADDR bit
+
+  // Wait for byte to move into data register.
+	while(!(I2C1->SR1 & I2C_SR1_RXNE)){}
+
+  uint8_t recieved_data = I2C1->DR;
+
+
+	I2C1->CR1 |= I2C_CR1_STOP; // End the transfer sequence.
+
+  // Re-Enable I2C to generate ACK for next transaction
+  I2C1->CR1 |= (I2C_CR1_ACK);
+
+  // Since NACK is sent after the last data the AF flag in SR1 is active
+  // we are going to clear it
+  I2C1->SR1 &=~(I2C_SR1_AF);
+
+  return recieved_data;
 }
