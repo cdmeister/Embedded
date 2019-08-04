@@ -451,3 +451,68 @@ uint8_t CS43L22_readReg(uint8_t address){
 
   return recieved_data;
 }
+
+
+void CS43L22_powerUp(void){
+
+  // Reset the Codec
+  CS43L22_rest();
+
+  // Wait till the power supplies are ready
+  Delay(CS43L22_RESET_DELAY);
+
+  // Bring RESET Pin to high so we can now program the part
+  CS43L22_activate();
+
+  // Keep the device powered down while we program our desired settings
+  CS43L22_writeReg(0x02,0x01);
+
+  // Headphone Always ON, Speakers OFF
+  CS43L22_writeReg(0x04,0xAF);
+
+  // Automatic Clock Control Detection
+  CS43L22_writeReg(0x05,0x81);
+
+  // I2S mode
+  CS43L22_writeReg(0x06,0x04);
+
+  // Set volume
+  CS43L22_writeReg(0x20, (0xff + 0x19) & 0xff);
+	CS43L22_writeReg(0x21, (0xff + 0x19) & 0xff);
+
+  // Power on the codec.
+	CS43L22_writeReg(0x02, 0x9E);
+
+	// Configure codec for fast shutdown.
+	CS43L22_writeReg(0x0A, 0x00); // Disable the analog soft ramp.
+	CS43L22_writeReg(0x0E, 0x04); // Disable the digital soft ramp.
+
+  // Initialization Sequence (p. 32)
+  CS43L22_writeReg(0x00,0x99);
+  CS43L22_writeReg(0x47,0x80);
+  uint8_t value=CS43L22_readReg(0x32);
+  CS43L22_writeReg(0x32,(value|0x80));
+  CS43L22_writeReg(0x32,(value&~(0x80));
+  CS43L22_writeReg(0x00,0x00);
+
+  /* Disable the limiter attack level */
+  CS43L22_writeReg(0x27, 0x00);
+
+  /* Adjust Bass and Treble levels */
+  CS43L22_writeReg(0x1F, 0x0F);
+
+  /* Adjust PCM volume level */
+  CS43L22_writeReg(0x1A, 0x0A);
+  CS43L22_writeReg(0x1B, 0x0A);
+
+  CS43L22_writeReg(0x02,0x9E);
+}
+
+
+void CS43L22_powerDown(void){
+
+  CS43L22_writeReg(0x0F,0xC0);
+	CS43L22_writeReg(0x02, 0x9F);
+  CS43L22_reset();
+
+}

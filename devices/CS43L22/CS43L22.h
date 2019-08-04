@@ -13,9 +13,14 @@
 #define __CS43L22_H
 
 /* Includes ------------------------------------------------------------------*/
+#include "systick.h"
 /* Exported types ------------------------------------------------------------*/
 uint16_t CS43L22_address = 0x94;
 /* Exported constants --------------------------------------------------------*/
+
+/* Delay for the Codec to be correctly reset */
+#define CS43L22_RESET_DELAY               0x4FFF
+
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 
