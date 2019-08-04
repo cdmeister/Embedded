@@ -1,7 +1,7 @@
 #include "CS43L22.h"
 
 
-void CS43L22_init(){
+void CS43L22_Init(){
 
   // Setup All of the GPIO Pins for
   //  1. I2C1
@@ -11,7 +11,9 @@ void CS43L22_init(){
 
 
   // Setup the I2C1 module
-
+  CS43L22_I2C_init();
+  CS43L22_I2S_init();
+  CS43L22_powerUp();
   return;
 }
 

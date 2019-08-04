@@ -24,7 +24,7 @@ uint16_t CS43L22_address = 0x94;
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 
-void CS43L22_init();
+void CS43L22_Init();
 void CS43L22_writeReg(uint8_t address, uint8_t data);
 uint8_t CS43L22_readReg(uint8_t address);
 void CS43L22_powerDown();

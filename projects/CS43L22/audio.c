@@ -31,6 +31,12 @@
 #define PORTD_12 0x00001000
 #define PORTD_ALL 0x0000F000
 
+const uint16_t AUDIO_SAMPLE[] = {
+0x4952, 0x4646, 0x4f6e, 0xf, 0x4157, 0x4556, 0x6d66, 0x2074, 0x12, 0, 0x1,
+0x2, 0xbb80, 0, 0xee00, 0x2, 0x4, 0x10, 0, 0x6166, 0x7463, 0x4,
+0, 0xd3cf, 0x3, 0x6164, 0x6174, 0x4f3c, 0xf,-1};
+
+
 int main(void)
 {
   /*!< At this stage the microcontroller clock setting is already configured,
@@ -39,10 +45,23 @@ int main(void)
        To reconfigure the default setting of SystemInit() function, refer to
         system_stm32f4xx.c file
      */
+  SysTick_Init(SystemCoreClock/1000);
+  CS43L22_Init();
 
    /* Infinite loop */
+  int i =0;
   while (1)
-  {}
+  {
+    while(!(SPI3->SR & SPI_SR_TXE));
+    if(AUDIO_SAMPLE[i] >-1){
+      SPI3->DR = AUDIO_SAMPLE[i];
+      i++;
+
+    }
+    else{i=0;}
+    Delay(1000);
+  }
+
 
   return 0;
 }
