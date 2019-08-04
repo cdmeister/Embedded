@@ -14,8 +14,10 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "systick.h"
+#include "clock.h"
+#include "stm32f407xx.h"
 /* Exported types ------------------------------------------------------------*/
-uint16_t CS43L22_address = 0x94;
+extern uint16_t CS43L22_address;
 /* Exported constants --------------------------------------------------------*/
 
 /* Delay for the Codec to be correctly reset */
@@ -31,9 +33,6 @@ void CS43L22_powerDown();
 void CS43L22_powerUp();
 void CS43L22_reset();
 void CS43L22_activate();
-static void CS43L22_GPIO_init();
-static void CS43L22_I2C_init();
-static void CS43L22_I2S_init();
 
 
 

@@ -4,9 +4,9 @@
 inline void I2C_clock_init(I2C_TypeDef * I2Cx){
 
   // Enable I2C Periphal bus
-  if(I2Cx == I2C1) RCC->AHB1ENR |= (RCC_AHB1ENR_I2C1EN);
-  else if(I2Cx == I2C2) RCC->AHB1ENR |= (RCC_AHB1ENR_I2C2EN);
-  else if(I2Cx == I2C3) RCC->AHB1ENR |= (RCC_AHB1ENR_I2C3EN);
+  if(I2Cx == I2C1) RCC->APB1ENR |= (RCC_APB1ENR_I2C1EN);
+  else if(I2Cx == I2C2) RCC->APB1ENR |= (RCC_APB1ENR_I2C2EN);
+  else if(I2Cx == I2C3) RCC->APB1ENR |= (RCC_APB1ENR_I2C3EN);
   else {
     // Todo: Figure out what to do for error handling
     while(1);

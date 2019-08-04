@@ -1,5 +1,10 @@
 #include "CS43L22.h"
 
+static void CS43L22_GPIO_init();
+static void CS43L22_I2C_init();
+static void CS43L22_I2S_init();
+
+uint16_t CS43L22_address = 0x94;
 
 void CS43L22_Init(){
 
@@ -32,8 +37,8 @@ static void CS43L22_GPIO_init(){
   GPIOB->MODER &=~(GPIO_MODER_MODE6|GPIO_MODER_MODE9);
   GPIOB->MODER |=(GPIO_MODER_MODE6_1| GPIO_MODER_MODE9_1);
 
-  GPIOB->AFR[0] &= ~(GPIO_AFRL_AFSEL6|GPIO_AFRL_AFSEL9);
-  GPIOB->AFR[0] |= (GPIO_AFRL_AFSEL6_2|GPIO_AFRL_AFSEL9_2);
+  GPIOB->AFR[0] &= ~(GPIO_AFRL_AFSEL6|GPIO_AFRH_AFSEL9);
+  GPIOB->AFR[0] |= (GPIO_AFRL_AFSEL6_2|GPIO_AFRH_AFSEL9_2);
 
   // Set output tupe of all pins as push-pull
   // 0 = push-pull (default)
@@ -153,7 +158,7 @@ static void CS43L22_GPIO_init(){
 static void CS43L22_I2C_init(){
 
   // Enable I2C Periphal bus
-  RCC->AHB1ENR |= (RCC_AHB1ENR_I2C1EN);
+  RCC->APB1ENR |= (RCC_APB1ENR_I2C1EN);
 
   // Disable I2C for configuration(Espicialy for TRISE)
   I2C1->CR1 &= ~(I2C_CR1_PE);
@@ -189,8 +194,8 @@ static void CS43L22_I2C_init(){
   I2C1->CR1 &= ~(I2C_CR1_SMBUS);
 
   // Enable I2C to generate ACK
-  I2C1-CR1 &= ~(I2C_CR1_ACK);
-  I2C1-CR1 |= (I2C_CR1_ACK);
+  I2C1->CR1 &= ~(I2C_CR1_ACK);
+  I2C1->CR1 |= (I2C_CR1_ACK);
 
 
   // 7-bit Addressing Mode
@@ -222,19 +227,19 @@ static void CS43L22_I2S_init(){
 
 
   // Enable the periphery clock for SPI/I2S interface
-  RCC->AHB1ENR |= (RCC_AHB1ENR_SPI3EN);
+  RCC->APB1ENR |= (RCC_APB1ENR_SPI3EN);
 
   // I2SE: I2S Enable
   //    0: I2S peripheral is disabled <----
   //    1: I2S peripheral is enabled
   // Note: This bit is not used in SPI mode.
-  SPI3->IS2CFGR &= ~(SPI_I2SCFGR_I2SE);
+  SPI3->I2SCFGR &= ~(SPI_I2SCFGR_I2SE);
 
   // I2SMOD: I2S mode selection
   //    0: SPI mode is selected <----
   //    1: I2S mode is selected
   // Note: This bit should be configured when the SPI or I2S is disabled
-  SPI3->IS2CFGR |= (SPI_I2SCFGR_I2SMOD);
+  SPI3->I2SCFGR |= (SPI_I2SCFGR_I2SMOD);
 
   // Here enable the PLLI2S to be the source of the clock and set Prescaler
   SystemPLLI2SEnable(258,3);
@@ -244,7 +249,7 @@ static void CS43L22_I2S_init(){
   // 48kHz, there is an equation that uses these factors to get close
   // to your desired audio sampling frequency;
   uint32_t i2sdiv = 3;
-  uint32_t i2odd = 1;
+  uint32_t i2sodd = 1;
 
   // ODD: Odd factor for the prescaler
   //    0: real divider value is = I2SDIV *2
@@ -278,8 +283,8 @@ static void CS43L22_I2S_init(){
   //    11: Master - receive
   // Note: This bit should be configured when the I2S is disabled.
   // It is not used in SPI mode.
-  SPI3->IS2CFGR &= ~(SPI_I2SCFGR_I2SCFGR);
-  SPI3->IS2CFGR |= (SPI_I2SCFGR_I2SCFGR_1);
+  SPI3->I2SCFGR &= ~(SPI_I2SCFGR_I2SCFG);
+  SPI3->I2SCFGR |= (SPI_I2SCFGR_I2SCFG_1);
 
   // I2SSTD: I2S standard selection
   //    00: I2S Philips standard. <----
@@ -290,7 +295,7 @@ static void CS43L22_I2S_init(){
   // Not used in SPI mode.
   // Note: For correct operation, these bits should be configured when the
   //       I2S is disabled.
-  SPI3->IS2CFGR &= ~(SPI_I2SCFGR_I2SSTD);
+  SPI3->I2SCFGR &= ~(SPI_I2SCFGR_I2SSTD);
 
   // CKPOL: Steady state clock polarity
   //    0: I2S clock steady state is low level <----
@@ -298,7 +303,7 @@ static void CS43L22_I2S_init(){
   // Note: For correct operation, this bit should be configured when the
   //       I2S is disabled.
   // This bit is not used in SPI mode
-  SPI3->IS2CFGR &= ~(SPI_I2SCFGR_CKPOL);
+  SPI3->I2SCFGR &= ~(SPI_I2SCFGR_CKPOL);
 
   // DATLEN: Data length to be transferred
   //    00: 16-bit data length <----
@@ -308,7 +313,7 @@ static void CS43L22_I2S_init(){
   // Note: For correct operation, these bits should be configured when the
   //       I2S is disabled.
   // This bit is not used in SPI mode.
-  SPI3->IS2CFGR &= ~(SPI_I2SCFGR_DATALEN);
+  SPI3->I2SCFGR &= ~(SPI_I2SCFGR_DATLEN);
 
   // CHLEN: Channel length (number of bits per audio channel)
   //    0: 16-bit wide <----
@@ -318,7 +323,7 @@ static void CS43L22_I2S_init(){
   // value filled in. Not used in SPI mode.
   // Note: For correct operation, this bit should be configured when the
   //       I2S is disabled.
-  SPI3->IS2CFGR &= ~(SPI_I2SCFGR_CHLEN);
+  SPI3->I2SCFGR &= ~(SPI_I2SCFGR_CHLEN);
 
 }
 
@@ -356,7 +361,7 @@ void CS43L22_writeReg(uint8_t address, uint8_t data){
   // – Set when a Start condition generated.
   // – Cleared by software by reading the SR1 register followed by
   // writing the DR register, or by hardware when PE=0
-  while(!(I2C1->SR & I2C_SR1_SB)){
+  while(!(I2C1->SR1 & I2C_SR1_SB)){
     // Wait for start condition to be generated
   }
 
@@ -383,7 +388,7 @@ void CS43L22_writeReg(uint8_t address, uint8_t data){
   // – For 7-bit addressing, the bit is set after the ACK of the byte.
   // Note: ADDR is not set after a NACK reception
   while (!(I2C1 ->SR1 & I2C_SR1_ADDR )) {}// Wait for master transmitter mode.
-	volatile uint16_t dummy_read = I2C1 ->SR2; // Must read SR2 to clear ADDR bit
+	I2C1 ->SR2; // Must read SR2 to clear ADDR bit
 
   // TxE=1 , shift register empty, data register empty, write Data1 in DR
   while(!(I2C1->SR1 & I2C_SR1_TXE)){}
@@ -407,13 +412,13 @@ uint8_t CS43L22_readReg(uint8_t address){
   // Send the START generation
   I2C1->CR1 |= I2C_CR1_START;
 
-  while(!(I2C1->SR & I2C_SR1_SB)){
+  while(!(I2C1->SR1 & I2C_SR1_SB)){
     // Wait for start condition to be generated
   }
 
   I2C1->DR = CS43L22_address; // Send the chip address
   while (!(I2C1 ->SR1 & I2C_SR1_ADDR )) {}// Wait for master transmitter mode.
-	volatile uint16_t dummy_read = I2C1 ->SR2; // Must read SR2 to clear ADDR bit
+	I2C1 ->SR2; // Must read SR2 to clear ADDR bit
 
   // TxE=1 , shift register empty, data register empty, write Data1 in DR
   while(!(I2C1->SR1 & I2C_SR1_TXE)){}
@@ -425,7 +430,7 @@ uint8_t CS43L22_readReg(uint8_t address){
 
   // Read Sequence
   I2C1->CR1 |= I2C_CR1_START;
-   while(!(I2C1->SR & I2C_SR1_SB)){
+   while(!(I2C1->SR1 & I2C_SR1_SB)){
     // Wait for start condition to be generated
   }
 
@@ -433,8 +438,8 @@ uint8_t CS43L22_readReg(uint8_t address){
   while (!(I2C1 ->SR1 & I2C_SR1_ADDR )) {}// Wait for master reciver mode.
 
   // Disable I2C to generate ACK
-  I2C1-CR1 &= ~(I2C_CR1_ACK);
-	volatile uint16_t dummy_read = I2C1 ->SR2; // Must read SR2 to clear ADDR bit
+  I2C1->CR1 &= ~(I2C_CR1_ACK);
+	I2C1->SR2; // Must read SR2 to clear ADDR bit
 
   // Wait for byte to move into data register.
 	while(!(I2C1->SR1 & I2C_SR1_RXNE)){}
@@ -458,7 +463,7 @@ uint8_t CS43L22_readReg(uint8_t address){
 void CS43L22_powerUp(void){
 
   // Reset the Codec
-  CS43L22_rest();
+  CS43L22_reset();
 
   // Wait till the power supplies are ready
   Delay(CS43L22_RESET_DELAY);
@@ -494,7 +499,7 @@ void CS43L22_powerUp(void){
   CS43L22_writeReg(0x47,0x80);
   uint8_t value=CS43L22_readReg(0x32);
   CS43L22_writeReg(0x32,(value|0x80));
-  CS43L22_writeReg(0x32,(value&~(0x80));
+  CS43L22_writeReg(0x32,(value&(~0x80)));
   CS43L22_writeReg(0x00,0x00);
 
   /* Disable the limiter attack level */

@@ -338,7 +338,7 @@ uint16_t GetPLLM(void){
 
 }
 
-void SetPLLI2SPrescaler(uint8_t plli2s_n, uint16_t plli2s_r){
+void SetPLLI2SPrescaler(uint16_t plli2s_n, uint16_t plli2s_r){
 
   /*  Configre the multiplier and division factors to
   *   the RCC_PLLI2SCFGR Register
@@ -351,7 +351,7 @@ void SetPLLI2SPrescaler(uint8_t plli2s_n, uint16_t plli2s_r){
   return;
 }
 
-void SystemPLLI2SEnable(uint8_t plli2s_n, uint16_t plli2s_r){
+void SystemPLLI2SEnable(uint16_t plli2s_n, uint16_t plli2s_r){
 
   // Set and cleared by software. This bit allows to select the I2S clock
   // source between the PLLI2S clock and the external clock. It is highly

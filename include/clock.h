@@ -61,7 +61,7 @@ extern uint32_t GetSystemClock(void);
 extern uint16_t GetPLLI2SR(void);
 extern uint16_t GetPLLI2SN(void);
 extern uint16_t GetPLLM(void);
-extern void SetPLLI2SPrescaler(uint8_t plli2s_n, uint16_t plli2s_r);
-extern void SystemPLLI2SEnable(uint8_t plli2s_n, uint16_t plli2s_r);
+extern void SetPLLI2SPrescaler(uint16_t plli2s_n, uint16_t plli2s_r);
+extern void SystemPLLI2SEnable(uint16_t plli2s_n, uint16_t plli2s_r);
 
 #endif /* __CLOCK_H */
