@@ -14,7 +14,7 @@
 #define __USART_H
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f4xx.h"
+#include "stm32f407xx.h"
 #include "systick.h"
 #include "string.h"
 #include "stdlib.h"

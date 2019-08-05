@@ -10,6 +10,7 @@
 */
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32f407xx.h"
 #include "systick.h"
 #include "lcd.h"
 #include "helper.h"

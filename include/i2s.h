@@ -1,33 +1,22 @@
 /**
   ******************************************************************************
-  * @file    helper.h
+  * @file    i2s.h
   * @author  Moeiz Riaz
   * @version V1.0.0
   * @date    2-July-2019
-  * @brief   Random Functions
+  * @brief   i2c module
   ******************************************************************************
 */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __HELPER_H
-#define __HELPER_H
+#ifndef __I2S_H
+#define __I2S_H
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f407xx.h"
-#include "math.h"
 /* Exported types ------------------------------------------------------------*/
-typedef struct RangeMap{
-
-  double _slope;
-  double _input_start,_input_end;
-  double _output_start,_output_end;
-
-}RangeMap;
 /* Exported constants --------------------------------------------------------*/
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-void RangeMap_init(RangeMap * RangeMapx,double input_start, double input_end,
-                    double output_start,double output_end);
-
-double RangeMap_map(RangeMap* RangeMapx, double input);
-#endif /* __HELPER_H */
+inline void I2S_init(SPI_TypeDef * I2Sx);
+#endif /* __I2S_H */

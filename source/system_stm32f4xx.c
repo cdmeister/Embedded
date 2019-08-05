@@ -64,7 +64,7 @@
   */
 
 
-#include "stm32f4xx.h"
+#include "stm32f407xx.h"
 
 /**
   * @}
@@ -81,6 +81,26 @@
 /** @addtogroup STM32F4xx_System_Private_Defines
   * @{
   */
+
+
+/** @addtogroup Exported_macro
+  * @{
+  */
+#define SET_BIT(REG, BIT)     ((REG) |= (BIT))
+
+#define CLEAR_BIT(REG, BIT)   ((REG) &= ~(BIT))
+
+#define READ_BIT(REG, BIT)    ((REG) & (BIT))
+
+#define CLEAR_REG(REG)        ((REG) = (0x0))
+
+#define WRITE_REG(REG, VAL)   ((REG) = (VAL))
+
+#define READ_REG(REG)         ((REG))
+
+#define MODIFY_REG(REG, CLEARMASK, SETMASK)  WRITE_REG((REG), (((READ_REG(REG)) & (~(CLEARMASK))) | (SETMASK)))
+
+#define POSITION_VAL(VAL) (__CLZ(__RBIT(VAL)))
 
 /************************* Miscellaneous Configuration ************************/
 /*!< Uncomment the following line if you need to use external SRAM or SDRAM as data memory  */
@@ -360,7 +380,7 @@ static void SetSysClock(void){
     RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLQ_Msk);
     RCC->PLLCFGR |= (PLL_Q << RCC_PLLCFGR_PLLQ_Pos); /*PLL_Q*/
 
-    /* Select PLL Source to be HSE */
+    /* Main PLL(PLL) and audio PLL (PLLI2S) use HSE as clock source */
     RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLSRC_Msk);
     RCC->PLLCFGR |=RCC_PLLCFGR_PLLSRC_HSE;
 

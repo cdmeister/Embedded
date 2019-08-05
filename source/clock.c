@@ -316,3 +316,67 @@ uint32_t GetPCLK2(void){
 
 }
 
+uint32_t GetSystemClock(void){
+  return SystemCoreClock;
+}
+
+uint16_t GetPLLI2SR(void){
+
+  return (RCC->PLLI2SCFGR & RCC_PLLI2SCFGR_PLLI2SR)>>RCC_PLLI2SCFGR_PLLI2SR_Pos;
+
+}
+
+uint16_t GetPLLI2SN(void){
+
+  return (RCC->PLLI2SCFGR & RCC_PLLI2SCFGR_PLLI2SN)>>RCC_PLLI2SCFGR_PLLI2SN_Pos;
+
+}
+
+uint16_t GetPLLM(void){
+
+  return (RCC->PLLCFGR & RCC_PLLCFGR_PLLM)>>RCC_PLLCFGR_PLLM_Pos;
+
+}
+
+void SetPLLI2SPrescaler(uint16_t plli2s_n, uint16_t plli2s_r){
+
+  /*  Configre the multiplier and division factors to
+  *   the RCC_PLLI2SCFGR Register
+  */
+  RCC->PLLI2SCFGR &= ~(RCC_PLLI2SCFGR_PLLI2SN);
+  RCC->PLLI2SCFGR |= (plli2s_n << RCC_PLLI2SCFGR_PLLI2SN_Pos); /*PLL_N*/
+
+  RCC->PLLI2SCFGR &= ~(RCC_PLLI2SCFGR_PLLI2SR);
+  RCC->PLLI2SCFGR |= (plli2s_r << RCC_PLLI2SCFGR_PLLI2SR_Pos); /*PLL_R*/
+  return;
+}
+
+void SystemPLLI2SEnable(uint16_t plli2s_n, uint16_t plli2s_r){
+
+  // Set and cleared by software. This bit allows to select the I2S clock
+  // source between the PLLI2S clock and the external clock. It is highly
+  // recommended to change this bit only after reset and before enabling
+  // the I2S module.
+  //    0: PLLI2S clock used as I2S clock source
+  //    1: External clock mapped on the I2S_CKIN pin used as I2S clock source
+	RCC->CFGR &= ~(RCC_CFGR_I2SSRC); // PLLI2S clock used as I2S clock source.
+
+  // Set the Prescalers
+  SetPLLI2SPrescaler(plli2s_n,plli2s_r);
+
+
+  // PLLI2SON: PLLI2S enable
+  // Set and cleared by software to enable PLLI2S.
+  // Cleared by hardware when entering Stop or Standby mode.
+  //    0: PLLI2S OFF
+  //    1: PLLI2S ON
+  RCC ->CR |= RCC_CR_PLLI2SON;
+
+  // PLLI2SRDY: PLLI2S clock ready flag
+  // Set by hardware to indicate that the PLLI2S is locked.
+  //    0: PLLI2S unlocked
+  //    1: PLLI2S locked
+ 	while (!(RCC ->CR & RCC_CR_PLLI2SRDY )){};
+
+  return;
+}

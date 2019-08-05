@@ -1,33 +1,39 @@
 /**
   ******************************************************************************
-  * @file    helper.h
+  * @file    CS43L22
   * @author  Moeiz Riaz
   * @version V1.0.0
-  * @date    2-July-2019
-  * @brief   Random Functions
+  * @date    14-JULY-2019
+  * @brief   Header for CS43L22
   ******************************************************************************
 */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __HELPER_H
-#define __HELPER_H
+#ifndef __CS43L22_H
+#define __CS43L22_H
 
 /* Includes ------------------------------------------------------------------*/
+#include "systick.h"
+#include "clock.h"
 #include "stm32f407xx.h"
-#include "math.h"
 /* Exported types ------------------------------------------------------------*/
-typedef struct RangeMap{
-
-  double _slope;
-  double _input_start,_input_end;
-  double _output_start,_output_end;
-
-}RangeMap;
+extern uint16_t CS43L22_address;
 /* Exported constants --------------------------------------------------------*/
+
+/* Delay for the Codec to be correctly reset */
+#define CS43L22_RESET_DELAY               0x4FFF
+
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-void RangeMap_init(RangeMap * RangeMapx,double input_start, double input_end,
-                    double output_start,double output_end);
 
-double RangeMap_map(RangeMap* RangeMapx, double input);
-#endif /* __HELPER_H */
+void CS43L22_Init();
+void CS43L22_writeReg(uint8_t address, uint8_t data);
+uint8_t CS43L22_readReg(uint8_t address);
+void CS43L22_powerDown();
+void CS43L22_powerUp();
+void CS43L22_reset();
+void CS43L22_activate();
+
+
+
+#endif /* __CS43L22_H */
