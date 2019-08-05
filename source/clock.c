@@ -359,7 +359,7 @@ void SystemPLLI2SEnable(uint16_t plli2s_n, uint16_t plli2s_r){
   // the I2S module.
   //    0: PLLI2S clock used as I2S clock source
   //    1: External clock mapped on the I2S_CKIN pin used as I2S clock source
-	RCC ->CFGR &= ~(RCC_CFGR_I2SSRC); // PLLI2S clock used as I2S clock source.
+	RCC->CFGR &= ~(RCC_CFGR_I2SSRC); // PLLI2S clock used as I2S clock source.
 
   // Set the Prescalers
   SetPLLI2SPrescaler(plli2s_n,plli2s_r);

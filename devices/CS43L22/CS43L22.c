@@ -37,8 +37,12 @@ static void CS43L22_GPIO_init(){
   GPIOB->MODER &=~(GPIO_MODER_MODE6|GPIO_MODER_MODE9);
   GPIOB->MODER |=(GPIO_MODER_MODE6_1| GPIO_MODER_MODE9_1);
 
-  GPIOB->AFR[0] &= ~(GPIO_AFRL_AFSEL6|GPIO_AFRH_AFSEL9);
-  GPIOB->AFR[0] |= (GPIO_AFRL_AFSEL6_2|GPIO_AFRH_AFSEL9_2);
+  GPIOB->AFR[0] &= ~(GPIO_AFRL_AFSEL6);
+  GPIOB->AFR[0] |= (GPIO_AFRL_AFSEL6_2);
+
+  GPIOB->AFR[1] &= ~(GPIO_AFRH_AFSEL9);
+  GPIOB->AFR[1] |= (GPIO_AFRH_AFSEL9_2);
+
 
   // Set output tupe of all pins as push-pull
   // 0 = push-pull (default)
@@ -169,10 +173,10 @@ static void CS43L22_I2C_init(){
   I2C1->CR2 |= (I2C_CR2_FREQ_5|I2C_CR2_FREQ_3|I2C_CR2_FREQ_1);
 
   // Pick Standard or Fast mode (Master Mode Selection)
-  I2C1->CCR &= (I2C_CCR_FS);
+  I2C1->CCR &= ~(I2C_CCR_FS);
 
   // IC2 Duty Cycle (Only for Fast Mode)
-  I2C1->CCR &= (I2C_CCR_DUTY);
+  I2C1->CCR &= ~(I2C_CCR_DUTY);
 
   // Standard mode speed calculate
   uint32_t pclk1 = GetPCLK1();
@@ -189,7 +193,7 @@ static void CS43L22_I2C_init(){
   I2C1->CCR |= result;
 
   // Set Maximum Rise Time for standard mode
-  I2C1->TRISE = (pclk1/100000) + 1;
+  I2C1->TRISE = (pclk1/1000000) + 1;
   // Select Mode I2C mode
   I2C1->CR1 &= ~(I2C_CR1_SMBUS);
 
@@ -203,9 +207,10 @@ static void CS43L22_I2C_init(){
 
   // Set a random address
   I2C1->OAR1 &= ~(I2C_OAR1_ADD1_7);
+  I2C1->OAR1 |= (0x4000|0x33);
 
   // Set bit 14 to 0x1. From reference manual
-  I2C1->OAR1 |= (1U << 14U);
+  //I2C1->OAR1 |= (1U << 14U);
 
   // Enable the selected I2C peripheral
   I2C1->CR1 |= I2C_CR1_PE;
@@ -236,8 +241,8 @@ static void CS43L22_I2S_init(){
   SPI3->I2SCFGR &= ~(SPI_I2SCFGR_I2SE);
 
   // I2SMOD: I2S mode selection
-  //    0: SPI mode is selected <----
-  //    1: I2S mode is selected
+  //    0: SPI mode is selected
+  //    1: I2S mode is selected <----
   // Note: This bit should be configured when the SPI or I2S is disabled
   SPI3->I2SCFGR |= (SPI_I2SCFGR_I2SMOD);
 
@@ -325,6 +330,13 @@ static void CS43L22_I2S_init(){
   //       I2S is disabled.
   SPI3->I2SCFGR &= ~(SPI_I2SCFGR_CHLEN);
 
+  // I2SE: I2S Enable
+  //    0: I2S peripheral is disabled
+  //    1: I2S peripheral is enabled <----
+  // Note: This bit is not used in SPI mode.
+  SPI3->I2SCFGR |= SPI_I2SCFGR_I2SE;
+
+
 }
 
 // RESET Pin to LOW
@@ -403,6 +415,7 @@ void CS43L22_writeReg(uint8_t address, uint8_t data){
   while (!(I2C1 ->SR1 & I2C_SR1_BTF )){} // Wait for all bytes to finish.
 
 	I2C1 ->CR1 |= I2C_CR1_STOP; // End the transfer sequence.
+
 }
 
 // Reading a register is done by doing a write register sequence then
@@ -462,11 +475,11 @@ uint8_t CS43L22_readReg(uint8_t address){
 
 void CS43L22_powerUp(void){
 
-  // Reset the Codec
+ // Reset the Codec
   CS43L22_reset();
 
   // Wait till the power supplies are ready
-  Delay(CS43L22_RESET_DELAY);
+  Delay(10);
 
   // Bring RESET Pin to high so we can now program the part
   CS43L22_activate();
@@ -502,17 +515,18 @@ void CS43L22_powerUp(void){
   CS43L22_writeReg(0x32,(value&(~0x80)));
   CS43L22_writeReg(0x00,0x00);
 
-  /* Disable the limiter attack level */
+  // Disable the limiter attack level
   CS43L22_writeReg(0x27, 0x00);
 
-  /* Adjust Bass and Treble levels */
+  // Adjust Bass and Treble levels
   CS43L22_writeReg(0x1F, 0x0F);
 
-  /* Adjust PCM volume level */
+  // Adjust PCM volume level
   CS43L22_writeReg(0x1A, 0x0A);
   CS43L22_writeReg(0x1B, 0x0A);
 
   CS43L22_writeReg(0x02,0x9E);
+
 }
 
 
