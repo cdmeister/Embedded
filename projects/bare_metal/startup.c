@@ -64,8 +64,9 @@ extern uint32_t _edata;
 extern uint32_t _sbss;
 extern uint32_t _ebss;
 
-volatile uint32_t dataVar = 0x3F;
-volatile uint32_t bssVar;
+volatile uint32_t __attribute__((used)) dataVar = 0x3F;
+volatile uint32_t __attribute__((used)) bssVar;
+const uint32_t val = 1111;
 
 inline void _initialize_data(uint32_t * flash_begin, uint32_t * data_begin,
                               uint32_t * data_end){
@@ -94,7 +95,10 @@ int main() {
   *RCC_AHB1ENR |= (0x1<<0x3U);
   /* Configure the PA5 as output pull-up */
   *GPIOD_MODER |= GPIO_MODER_MODE12_0; // Sets MODER[11:10] = 0x1
-  while(bssVar == 0) {
+  bssVar = 0x3F;
+  const uint32_t * p = &val;
+  while(bssVar == dataVar) {
+    /* CORTEX M4F only support single precision hence the X.XXF */
     *GPIOD_ODR ^= 0x1000;
     delay(200000);
     *GPIOD_ODR ^= 0x0000;
@@ -102,5 +106,6 @@ int main() {
   }
 }
 void delay(uint32_t count) {
+  if(count > 100){count +=val;}
   while(count--);
 }

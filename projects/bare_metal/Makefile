@@ -9,7 +9,7 @@ FLOAT_ABI = -mfloat-abi=hard
 
 LSCRIPT=mem.ld
 
-DEBUG = -H -g
+DEBUG = -H -g -O0 -gdwarf-4 -ggdb3
 
 
 CFLAGS=$(CPU) -mthumb $(FPU) $(FLOAT_ABI) $(DEBUG) -ffreestanding -nostdlib

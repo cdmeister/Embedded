@@ -3,7 +3,7 @@
 /* Entry Point
 * Doesn't really matter but informative for debuggers,etc
 */
-ENTRY(main)
+ENTRY(_start)
 
 MEMORY {
   FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 1024K
@@ -15,13 +15,27 @@ MEMORY {
 /* Output Sectons */
 SECTIONS {
   /* Text section (code and read-only data)*/
-  .text : ALIGN(4) {
+  .text : {
+     . = ALIGN(4);
     /*Insert ISR vector table first*/
     *(.isr_vector)
     /* test section (code) */
     *(.text)
     *(.text*)
+     . = ALIGN(4);
     KEEP(*(.isr_vector))
+  } > FLASH
+
+
+  .rodata :  {
+     . = ALIGN(4);
+
+    /* .rodata sections (constants) */
+    *(.rodata)
+
+    /* .rodata* sections (strings, etc.) */
+    *(.rodata*)
+     . = ALIGN(4);
   } > FLASH
 
   /* Used by the startup to initialize data */
@@ -43,6 +57,7 @@ SECTIONS {
 
   .bss : ALIGN(4) {
     /* This is used by the startup in order to initialize the .bss section */
+     . = ALIGN(4);
     _sbss = .; /* define a global symbol at bss start */
     *(.bss)
     *(.bss*)
@@ -51,5 +66,5 @@ SECTIONS {
     . = ALIGN(4);
     /* define a global symbol at bss end */
     _ebss = .;
-  } >RAM AT>RAM
+  } >RAM
 }
