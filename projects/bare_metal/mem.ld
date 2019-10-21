@@ -3,7 +3,7 @@
 /* Entry Point
 * Doesn't really matter but informative for debuggers,etc
 */
-ENTRY(Reset_Handler)
+ENTRY(main)
 
 MEMORY {
   FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 1024K
@@ -11,20 +11,45 @@ MEMORY {
   CCMRAM (rw) : ORIGIN = 0x10000000, LENGTH = 64K
 }
 
-_estack = ORIGIN(RAM) + LENGTH(RAM);
 
 /* Output Sectons */
 SECTIONS {
   /* Text section (code and read-only data)*/
-  .text : {
-    . = ALIGN(4); /* section is word aligned */
+  .text : ALIGN(4) {
     /*Insert ISR vector table first*/
-    KEEP(*(.isr_vector))
+    *(.isr_vector)
     /* test section (code) */
     *(.text)
+    *(.text*)
+    KEEP(*(.isr_vector))
   } > FLASH
 
-  .data : {
+  /* Used by the startup to initialize data */
+  /* this contains the LMA of the data section */
+  _sidata=LOADADDR(.data);
+
+  .data : ALIGN(4) {
+    . = ALIGN(4);
+    _sdata = .; /* create a global symbol at data start */
+
     *(.data)
-  } > RAM
+    *(.data*)
+
+    . = ALIGN(4);
+    _edata = .;
+  } > RAM AT>FLASH
+
+
+
+  .bss : ALIGN(4) {
+    /* This is used by the startup in order to initialize the .bss section */
+    _sbss = .; /* define a global symbol at bss start */
+    *(.bss)
+    *(.bss*)
+    *(COMMON)
+
+    . = ALIGN(4);
+    /* define a global symbol at bss end */
+    _ebss = .;
+  } >RAM AT>RAM
 }

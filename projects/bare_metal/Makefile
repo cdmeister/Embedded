@@ -7,10 +7,13 @@ CPU = -mcpu=cortex-m4
 FPU = -mfpu=fpv4-sp-d16
 FLOAT_ABI = -mfloat-abi=hard
 
-DEBUG = -g -ggdb -Wall -Wno-main
+LSCRIPT=mem.ld
 
-CFLAGS=$(CPU) -mthumb $(FPU) $(FLOAT_ABI) $(DEBUG)
-LDFLAGS:=-T mem.ld -gc-sections -nostdlib -Map=image.map
+DEBUG = -H -g
+
+
+CFLAGS=$(CPU) -mthumb $(FPU) $(FLOAT_ABI) $(DEBUG) -ffreestanding -nostdlib
+LDFLAGS = -T $(LSCRIPT) -gc-sections -Map=image.map -nostdlib
 
 #all: image.bin
 
