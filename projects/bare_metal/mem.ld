@@ -66,5 +66,8 @@ SECTIONS {
     . = ALIGN(4);
     /* define a global symbol at bss end */
     _ebss = .;
+    _end_static = _ebss;
+    _Heap_Size = 0x190;
+    _Heap_Limit = _end_static + _Heap_Size;
   } >RAM
 }
