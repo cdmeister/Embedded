@@ -42,7 +42,7 @@ LSCRIPT=mem.ld
 # Libs for Linker
 # gonna use -nostdlib and pick and choose desired libs
 # -lc has malloc but need to implement _sbrk
-LIBS = -lc
+LIBS =-lc
 # Linker Flags
 LDFLAGS = -T$(LSCRIPT)  $(MCU) -nostdlib $(LIBS)
 
@@ -63,4 +63,4 @@ startup.o: startup.c
 .PHONY: clean nuke
 
 make nuke:
-	-rm -rf *.o *.elf *.bin
+	-rm -rf *.o *.elf *.bin *.hex

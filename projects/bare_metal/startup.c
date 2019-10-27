@@ -1,4 +1,5 @@
 #include "stdlib.h"
+#include "stdint.h"
 #include "string.h"
 
 typedef unsigned long uint32_t;
@@ -66,8 +67,8 @@ extern uint32_t _edata;
 extern uint32_t _sbss;
 extern uint32_t _ebss;
 
-extern uint32_t _end_static;
-extern uint32_t _Heap_Limit;
+extern uint32_t _start_heap;
+extern uint32_t _end_heap;
 
 volatile uint32_t __attribute__((used)) dataVar = 0x3F;
 volatile uint32_t __attribute__((used)) bssVar;
@@ -88,24 +89,22 @@ inline void _initialize_bss(uint32_t * bss_begin, uint32_t * bss_end){
 }
 
 /* THIS IS BROKEN */
-void * _sbrk(int incr){
-  static uint32_t * heap_end;
-  uint32_t * prev_heap_end;
-
-  if(heap_end == 0){
-    heap_end = &_end_static;
+void * _sbrk(uint32_t incr){
+  static uint32_t * heap = NULL;
+  void * old_heap = heap;
+  if((incr & 0x03) != incr) {
+    incr = ((incr >> 2) + 1) << 2;
   }
-
-  prev_heap_end = heap_end;
-
-  if ( heap_end +incr > &_Heap_Limit){
-    asm("BKPT");
-    return (void *) NULL;
+  if(old_heap == NULL){
+    old_heap = heap = (uint32_t *) &_start_heap;
   }
-
-  heap_end +=incr;
-
-  return(void *) prev_heap_end;
+  if((heap +incr) >= &_end_heap){
+    return (void *)(-1);
+  }
+  else{
+    heap += incr;
+  }
+  return old_heap;
 }
 
 void __attribute__((noreturn,weak)) _start(void){
@@ -117,7 +116,8 @@ void __attribute__((noreturn,weak)) _start(void){
 
 int main() {
   const uint32_t * p = &val;
-  /*char * heapMsg = (char *)malloc(sizeof(char)*strlen(msg));*/
+  char * heapMsg =(char *)malloc(sizeof(char)* (strlen(msg)));
+  strcpy(heapMsg,msg);
   /* Enable clock on GPIOA peripheral */
   *RCC_AHB1ENR |= (0x1<<0x3U);
   /* Configure the PA5 as output pull-up */
