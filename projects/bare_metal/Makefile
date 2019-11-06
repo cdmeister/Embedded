@@ -19,6 +19,7 @@ CPU = -mcpu=cortex-m4
 FPU = -mfpu=fpv4-sp-d16
 FLOAT-ABI = -mfloat-abi=hard
 MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
+GCC_STANDARD = -std=c90
 
 # Additional DEBUG Flag
 OPT = -O3
@@ -33,7 +34,7 @@ endif
 
 # Compiler Flags
 #CFLAGS += -ffreestanding
-CFLAGS += $(MCU) $(DEBUG_FLAG) $(OPT)
+CFLAGS += $(MCU) $(DEBUG_FLAG) $(OPT) $(GCC_STANDARD) -ffreestanding
 
 
 # Linker Script
@@ -42,9 +43,9 @@ LSCRIPT=mem.ld
 # Libs for Linker
 # gonna use -nostdlib and pick and choose desired libs
 # -lc has malloc but need to implement _sbrk
-LIBS =-lc
+LIBS = -lc
 # Linker Flags
-LDFLAGS = -T$(LSCRIPT)  $(MCU) -nostdlib $(LIBS)
+LDFLAGS = -T$(LSCRIPT)  $(MCU) -nostdlib $(LIBS) -Wl,-Map=map.map -Wl,--cref -Wl,--gc-sections
 
 # Objs
 #OBJ = startup.o
@@ -54,13 +55,19 @@ all: $(TARGET).bin
 $(TARGET).bin: $(TARGET).elf
 	$(CP) -O binary $< $@
 
-$(TARGET).elf: startup.o
-	$(LD) startup.o $(LDFLAGS) -o bare_metal.elf
+$(TARGET).elf: startup.o vector_table.o
+	$(LD) startup.o vector_table.o $(LDFLAGS) -o bare_metal.elf
 
-startup.o: startup.c
+startup.o: startup.c linker_defines.h
 	$(CC) $(CFLAGS) -c startup.c
+
+vector_table.o: vector_table.c linker_defines.h
+	$(CC) $(CFLAGS) -c vector_table.c
+
+
+
 
 .PHONY: clean nuke
 
 make nuke:
-	-rm -rf *.o *.elf *.bin *.hex
+	-rm -rf *.o *.elf *.bin *.hex *.map

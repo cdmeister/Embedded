@@ -3,7 +3,7 @@
 /* Entry Point
 * Doesn't really matter but informative for debuggers,etc
 */
-ENTRY(_start)
+ENTRY(Reset_Handler)
 
 MEMORY {
   FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 1024K
@@ -12,18 +12,25 @@ MEMORY {
 }
 
 
+/* Highest address of the user mode stack */
+_estack = 0x20020000;    /* end of RAM */
+
 /* Output Sectons */
 SECTIONS {
+  .isr_vector :ALIGN(512) {
+    /*Insert ISR vector table first*/
+    KEEP(*(.isr_vector))
+    /* Vector table needs to be word aligned, next address that would be
+     * word aligned is 512
+    */
+  } > FLASH = 0xEE
+
   /* Text section (code and read-only data)*/
   .text : {
-     . = ALIGN(4);
-    /*Insert ISR vector table first*/
-    *(.isr_vector)
     /* test section (code) */
     *(.text)
     *(.text*)
-     . = ALIGN(4);
-    KEEP(*(.isr_vector))
+    . = ALIGN(4);
   } > FLASH
 
 
