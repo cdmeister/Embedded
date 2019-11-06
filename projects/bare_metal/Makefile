@@ -55,14 +55,21 @@ all: $(TARGET).bin
 $(TARGET).bin: $(TARGET).elf
 	$(CP) -O binary $< $@
 
-$(TARGET).elf: startup.o vector_table.o
-	$(LD) startup.o vector_table.o $(LDFLAGS) -o bare_metal.elf
+$(TARGET).elf: startup.o vector_table.o dynamic_memory.o main.o
+	$(LD) startup.o vector_table.o dynamic_memory.o main.o $(LDFLAGS) -o bare_metal.elf
 
 startup.o: startup.c linker_defines.h
 	$(CC) $(CFLAGS) -c startup.c
 
 vector_table.o: vector_table.c linker_defines.h
 	$(CC) $(CFLAGS) -c vector_table.c
+
+dynamic_memory.o: dynamic_memory.c linker_defines.h
+	$(CC) $(CFLAGS) -c dynamic_memory.c
+
+main.o:
+	$(CC) $(CFLAGS) -c main.c
+
 
 
 

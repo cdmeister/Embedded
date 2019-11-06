@@ -13,7 +13,7 @@
 * this definition.
 *
 *******************************************************************************/
-void __attribute__((noreturn))  Default_Handler (void);
+void __attribute__((noreturn,weak))  Default_Handler (void);
 void Reset_Handler(void) __attribute__((weak,noreturn,alias("Default_Handler")));
 void NMI_Handler(void) __attribute__((weak, alias("Default_Handler")));
 void HardFault_Handler(void) __attribute__((weak,alias("Default_Handler")));
