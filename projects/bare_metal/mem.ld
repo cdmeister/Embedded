@@ -35,7 +35,6 @@ SECTIONS {
     . = ALIGN(4);
   } > FLASH
 
-
   .rodata :  {
      . = ALIGN(4);
 
@@ -64,7 +63,7 @@ SECTIONS {
 
 
 
-  .bss  : ALIGN(4) {
+  .bss (NOLOAD)  : ALIGN(4) {
     /* This is used by the startup in order to initialize the .bss section */
     _sbss = .; /* define a global symbol at bss start */
     *(.bss)
@@ -79,3 +78,16 @@ SECTIONS {
 }
 
 PROVIDE(_end_heap = ORIGIN(RAM) + LENGTH(RAM));
+/*
+ * Necessary group so the newlib stubs provided in the library,
+ * will correctly be linked with the appropriate newlib functions,
+ * and not optimized out, giving errors for undefined symbols.
+ * This way the libraries can be fed to the linker in any order.
+ */
+GROUP(
+   libgcc.a
+   libg.a
+   libc.a
+   libm.a
+   libnosys.a
+ )
