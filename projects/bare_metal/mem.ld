@@ -17,12 +17,14 @@ _estack = 0x20020000;    /* end of RAM */
 
 /* Output Sectons */
 SECTIONS {
-  .isr_vector :ALIGN(512) {
+  .isr_vector : {
     /*Insert ISR vector table first*/
-    KEEP(*(.isr_vector))
+     . = ALIGN(4);
     /* Vector table needs to be word aligned, next address that would be
      * word aligned is 512
     */
+    KEEP(*(.isr_vector))
+     . = ALIGN(4);
   } > FLASH = 0xEE
 
   /* Text section (code and read-only data)*/

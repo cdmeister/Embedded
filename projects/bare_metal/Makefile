@@ -34,7 +34,7 @@ endif
 
 # Compiler Flags
 #CFLAGS += -ffreestanding
-CFLAGS += $(MCU) $(DEBUG_FLAG) $(OPT) $(GCC_STANDARD) -ffreestanding
+CFLAGS += $(MCU) $(DEBUG_FLAG) $(OPT) $(GCC_STANDARD) -ffreestanding -ffunction-sections -nostdlib
 
 
 # Linker Script
