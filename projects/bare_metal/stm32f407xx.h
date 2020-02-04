@@ -1,6 +1,16 @@
 #ifndef __STM32F407_H
 #define __STM32F407_H
 
+/**
+  * @brief Power Control
+  */
+
+typedef struct
+{
+  volatile uint32_t CR;   /*!< PWR power control register,        Address offset: 0x00 */
+  volatile uint32_t CSR;  /*!< PWR power control/status register, Address offset: 0x04 */
+} PWR_TypeDef;
+
 
 /**
   * @brief Reset and Clock Control
@@ -39,17 +49,358 @@ typedef struct
   volatile uint32_t PLLI2SCFGR;    /*!< RCC PLLI2S configuration register,                           Address offset: 0x84 */
 } RCC_TypeDef;
 
+/**
+  * @brief FLASH Registers
+  */
+
+typedef struct
+{
+  volatile uint32_t ACR;      /*!< FLASH access control register,   Address offset: 0x00 */
+  volatile uint32_t KEYR;     /*!< FLASH key register,              Address offset: 0x04 */
+  volatile uint32_t OPTKEYR;  /*!< FLASH option key register,       Address offset: 0x08 */
+  volatile uint32_t SR;       /*!< FLASH status register,           Address offset: 0x0C */
+  volatile uint32_t CR;       /*!< FLASH control register,          Address offset: 0x10 */
+  volatile uint32_t OPTCR;    /*!< FLASH option control register ,  Address offset: 0x14 */
+  volatile uint32_t OPTCR1;   /*!< FLASH option control register 1, Address offset: 0x18 */
+} FLASH_TypeDef;
+
+/**
+  \ingroup    CMSIS_core_register
+  \defgroup   CMSIS_NVIC  Nested Vectored Interrupt Controller (NVIC)
+  \brief      Type definitions for the NVIC Registers
+  @{
+ */
+
+/**
+  \brief  Structure type to access the Nested Vectored Interrupt Controller (NVIC).
+ */
+typedef struct
+{
+  volatile uint32_t ISER[8U];               /*!< Offset: 0x000 (R/W)  Interrupt Set Enable Register */
+        uint32_t RESERVED0[24U];
+  volatile uint32_t ICER[8U];               /*!< Offset: 0x080 (R/W)  Interrupt Clear Enable Register */
+        uint32_t RSERVED1[24U];
+  volatile uint32_t ISPR[8U];               /*!< Offset: 0x100 (R/W)  Interrupt Set Pending Register */
+        uint32_t RESERVED2[24U];
+  volatile uint32_t ICPR[8U];               /*!< Offset: 0x180 (R/W)  Interrupt Clear Pending Register */
+        uint32_t RESERVED3[24U];
+  volatile uint32_t IABR[8U];               /*!< Offset: 0x200 (R/W)  Interrupt Active bit Register */
+        uint32_t RESERVED4[56U];
+  volatile uint8_t  IP[240U];               /*!< Offset: 0x300 (R/W)  Interrupt Priority Register (8Bit wide) */
+        uint32_t RESERVED5[644U];
+  volatile  uint32_t STIR;                   /*!< Offset: 0xE00 ( /W)  Software Trigger Interrupt Register */
+}  NVIC_Type;
+
+/* Software Triggered Interrupt Register Definitions */
+#define NVIC_STIR_INTID_Pos                 0U                                         /*!< STIR: INTLINESNUM Position */
+#define NVIC_STIR_INTID_Msk                (0x1FFUL /*<< NVIC_STIR_INTID_Pos*/)        /*!< STIR: INTLINESNUM Mask */
+
+/*@} end of group CMSIS_NVIC */
+
+
+/**
+  \ingroup  CMSIS_core_register
+  \defgroup CMSIS_SCB     System Control Block (SCB)
+  \brief    Type definitions for the System Control Block Registers
+  @{
+ */
+
+/**
+  \brief  Structure type to access the System Control Block (SCB).
+ */
+typedef struct
+{
+  volatile const  uint32_t CPUID;        /*!< Offset: 0x000 (R/ )  CPUID Base Register */
+  volatile uint32_t ICSR;                   /*!< Offset: 0x004 (R/W)  Interrupt Control and State Register */
+  volatile uint32_t VTOR;                   /*!< Offset: 0x008 (R/W)  Vector Table Offset Register */
+  volatile uint32_t AIRCR;                  /*!< Offset: 0x00C (R/W)  Application Interrupt and Reset Control Register */
+  volatile uint32_t SCR;                    /*!< Offset: 0x010 (R/W)  System Control Register */
+  volatile uint32_t CCR;                    /*!< Offset: 0x014 (R/W)  Configuration Control Register */
+  volatile uint8_t  SHP[12U];               /*!< Offset: 0x018 (R/W)  System Handlers Priority Registers (4-7, 8-11, 12-15) */
+  volatile uint32_t SHCSR;                  /*!< Offset: 0x024 (R/W)  System Handler Control and State Register */
+  volatile uint32_t CFSR;                   /*!< Offset: 0x028 (R/W)  Configurable Fault Status Register */
+  volatile uint32_t HFSR;                   /*!< Offset: 0x02C (R/W)  HardFault Status Register */
+  volatile uint32_t DFSR;                   /*!< Offset: 0x030 (R/W)  Debug Fault Status Register */
+  volatile uint32_t MMFAR;                  /*!< Offset: 0x034 (R/W)  MemManage Fault Address Register */
+  volatile uint32_t BFAR;                   /*!< Offset: 0x038 (R/W)  BusFault Address Register */
+  volatile uint32_t AFSR;                   /*!< Offset: 0x03C (R/W)  Auxiliary Fault Status Register */
+  volatile const  uint32_t PFR[2U];                /*!< Offset: 0x040 (R/ )  Processor Feature Register */
+  volatile const  uint32_t DFR;                    /*!< Offset: 0x048 (R/ )  Debug Feature Register */
+  volatile const  uint32_t ADR;                    /*!< Offset: 0x04C (R/ )  Auxiliary Feature Register */
+  volatile const  uint32_t MMFR[4U];               /*!< Offset: 0x050 (R/ )  Memory Model Feature Register */
+  volatile const  uint32_t ISAR[5U];               /*!< Offset: 0x060 (R/ )  Instruction Set Attributes Register */
+        uint32_t RESERVED0[5U];
+  volatile uint32_t CPACR;                  /*!< Offset: 0x088 (R/W)  Coprocessor Access Control Register */
+} SCB_Type;
+
+/* Memory mapping of Cortex-M4 Hardware */
+#define SCS_BASE            (0xE000E000UL)                            /*!< System Control Space Base Address */
+#define ITM_BASE            (0xE0000000UL)                            /*!< ITM Base Address */
+#define DWT_BASE            (0xE0001000UL)                            /*!< DWT Base Address */
+#define TPI_BASE            (0xE0040000UL)                            /*!< TPI Base Address */
+#define CoreDebug_BASE      (0xE000EDF0UL)                            /*!< Core Debug Base Address */
+#define SysTick_BASE        (SCS_BASE +  0x0010UL)                    /*!< SysTick Base Address */
+#define NVIC_BASE           (SCS_BASE +  0x0100UL)                    /*!< NVIC Base Address */
+#define SCB_BASE            (SCS_BASE +  0x0D00UL)                    /*!< System Control Block Base Address */
+
+#define SCB                 ((SCB_Type       *)     SCB_BASE      )   /*!< SCB configuration struct */
+#define NVIC                ((NVIC_Type      *)     NVIC_BASE     )   /*!< NVIC configuration struct */
 
 /* Peripheral_memory_map */
 #define PERIPH_BASE           0x40000000U /*Peripheral base address in the alias region */
-
-
-/* Peripheral memory map */
+#define APB1PERIPH_BASE       PERIPH_BASE
+#define APB2PERIPH_BASE       (PERIPH_BASE + 0x00010000U)
 #define AHB1PERIPH_BASE       (PERIPH_BASE + 0x00020000U)
+#define AHB2PERIPH_BASE       (PERIPH_BASE + 0x10000000U)
+
 
 #define RCC_BASE              (AHB1PERIPH_BASE + 0x3800U)
+#define FLASH_R_BASE          (AHB1PERIPH_BASE + 0x3C00U)
+#define PWR_BASE              (APB1PERIPH_BASE + 0x7000U)
+
 /* Peripheral_declaration */
 #define RCC                 ((RCC_TypeDef *) RCC_BASE)
+#define FLASH               ((FLASH_TypeDef *) FLASH_R_BASE)
+#define PWR                 ((PWR_TypeDef *) PWR_BASE)
+
+/******************************************************************************/
+/*                                                                            */
+/*                             Power Control                                  */
+/*                                                                            */
+/******************************************************************************/
+/********************  Bit definition for PWR_CR register  ********************/
+#define PWR_CR_LPDS_Pos        (0U)
+#define PWR_CR_LPDS_Msk        (0x1U << PWR_CR_LPDS_Pos)                       /*!< 0x00000001 */
+#define PWR_CR_LPDS            PWR_CR_LPDS_Msk                                 /*!< Low-Power Deepsleep                 */
+#define PWR_CR_PDDS_Pos        (1U)
+#define PWR_CR_PDDS_Msk        (0x1U << PWR_CR_PDDS_Pos)                       /*!< 0x00000002 */
+#define PWR_CR_PDDS            PWR_CR_PDDS_Msk                                 /*!< Power Down Deepsleep                */
+#define PWR_CR_CWUF_Pos        (2U)
+#define PWR_CR_CWUF_Msk        (0x1U << PWR_CR_CWUF_Pos)                       /*!< 0x00000004 */
+#define PWR_CR_CWUF            PWR_CR_CWUF_Msk                                 /*!< Clear Wakeup Flag                   */
+#define PWR_CR_CSBF_Pos        (3U)
+#define PWR_CR_CSBF_Msk        (0x1U << PWR_CR_CSBF_Pos)                       /*!< 0x00000008 */
+#define PWR_CR_CSBF            PWR_CR_CSBF_Msk                                 /*!< Clear Standby Flag                  */
+#define PWR_CR_PVDE_Pos        (4U)
+#define PWR_CR_PVDE_Msk        (0x1U << PWR_CR_PVDE_Pos)                       /*!< 0x00000010 */
+#define PWR_CR_PVDE            PWR_CR_PVDE_Msk                                 /*!< Power Voltage Detector Enable       */
+
+#define PWR_CR_PLS_Pos         (5U)
+#define PWR_CR_PLS_Msk         (0x7U << PWR_CR_PLS_Pos)                        /*!< 0x000000E0 */
+#define PWR_CR_PLS             PWR_CR_PLS_Msk                                  /*!< PLS[2:0] bits (PVD Level Selection) */
+#define PWR_CR_PLS_0           (0x1U << PWR_CR_PLS_Pos)                        /*!< 0x00000020 */
+#define PWR_CR_PLS_1           (0x2U << PWR_CR_PLS_Pos)                        /*!< 0x00000040 */
+#define PWR_CR_PLS_2           (0x4U << PWR_CR_PLS_Pos)                        /*!< 0x00000080 */
+
+/*!< PVD level configuration */
+#define PWR_CR_PLS_LEV0        0x00000000U                                     /*!< PVD level 0 */
+#define PWR_CR_PLS_LEV1        0x00000020U                                     /*!< PVD level 1 */
+#define PWR_CR_PLS_LEV2        0x00000040U                                     /*!< PVD level 2 */
+#define PWR_CR_PLS_LEV3        0x00000060U                                     /*!< PVD level 3 */
+#define PWR_CR_PLS_LEV4        0x00000080U                                     /*!< PVD level 4 */
+#define PWR_CR_PLS_LEV5        0x000000A0U                                     /*!< PVD level 5 */
+#define PWR_CR_PLS_LEV6        0x000000C0U                                     /*!< PVD level 6 */
+#define PWR_CR_PLS_LEV7        0x000000E0U                                     /*!< PVD level 7 */
+#define PWR_CR_DBP_Pos         (8U)
+#define PWR_CR_DBP_Msk         (0x1U << PWR_CR_DBP_Pos)                        /*!< 0x00000100 */
+#define PWR_CR_DBP             PWR_CR_DBP_Msk                                  /*!< Disable Backup Domain write protection                     */
+#define PWR_CR_FPDS_Pos        (9U)
+#define PWR_CR_FPDS_Msk        (0x1U << PWR_CR_FPDS_Pos)                       /*!< 0x00000200 */
+#define PWR_CR_FPDS            PWR_CR_FPDS_Msk                                 /*!< Flash power down in Stop mode                              */
+#define PWR_CR_VOS_Pos         (14U)
+#define PWR_CR_VOS_Msk         (0x1U << PWR_CR_VOS_Pos)                        /*!< 0x00004000 */
+#define PWR_CR_VOS             PWR_CR_VOS_Msk                                  /*!< VOS bit (Regulator voltage scaling output selection) */
+
+/* Legacy define */
+#define  PWR_CR_PMODE                        PWR_CR_VOS
+
+/*******************  Bit definition for PWR_CSR register  ********************/
+#define PWR_CSR_WUF_Pos        (0U)
+#define PWR_CSR_WUF_Msk        (0x1U << PWR_CSR_WUF_Pos)                       /*!< 0x00000001 */
+#define PWR_CSR_WUF            PWR_CSR_WUF_Msk                                 /*!< Wakeup Flag                                      */
+#define PWR_CSR_SBF_Pos        (1U)
+#define PWR_CSR_SBF_Msk        (0x1U << PWR_CSR_SBF_Pos)                       /*!< 0x00000002 */
+#define PWR_CSR_SBF            PWR_CSR_SBF_Msk                                 /*!< Standby Flag                                     */
+#define PWR_CSR_PVDO_Pos       (2U)
+#define PWR_CSR_PVDO_Msk       (0x1U << PWR_CSR_PVDO_Pos)                      /*!< 0x00000004 */
+#define PWR_CSR_PVDO           PWR_CSR_PVDO_Msk                                /*!< PVD Output                                       */
+#define PWR_CSR_BRR_Pos        (3U)
+#define PWR_CSR_BRR_Msk        (0x1U << PWR_CSR_BRR_Pos)                       /*!< 0x00000008 */
+#define PWR_CSR_BRR            PWR_CSR_BRR_Msk                                 /*!< Backup regulator ready                           */
+#define PWR_CSR_EWUP_Pos       (8U)
+#define PWR_CSR_EWUP_Msk       (0x1U << PWR_CSR_EWUP_Pos)                      /*!< 0x00000100 */
+#define PWR_CSR_EWUP           PWR_CSR_EWUP_Msk                                /*!< Enable WKUP pin                                  */
+#define PWR_CSR_BRE_Pos        (9U)
+#define PWR_CSR_BRE_Msk        (0x1U << PWR_CSR_BRE_Pos)                       /*!< 0x00000200 */
+#define PWR_CSR_BRE            PWR_CSR_BRE_Msk                                 /*!< Backup regulator enable                          */
+#define PWR_CSR_VOSRDY_Pos     (14U)
+#define PWR_CSR_VOSRDY_Msk     (0x1U << PWR_CSR_VOSRDY_Pos)                    /*!< 0x00004000 */
+#define PWR_CSR_VOSRDY         PWR_CSR_VOSRDY_Msk                              /*!< Regulator voltage scaling output selection ready */
+
+/* Legacy define */
+#define  PWR_CSR_REGRDY                      PWR_CSR_VOSRDY
+
+/******************************************************************************/
+/*                                                                            */
+/*                                    FLASH                                   */
+/*                                                                            */
+/******************************************************************************/
+/*******************  Bits definition for FLASH_ACR register  *****************/
+#define FLASH_ACR_LATENCY_Pos          (0U)
+#define FLASH_ACR_LATENCY_Msk          (0xFU << FLASH_ACR_LATENCY_Pos)         /*!< 0x0000000F */
+#define FLASH_ACR_LATENCY              FLASH_ACR_LATENCY_Msk
+#define FLASH_ACR_LATENCY_0WS          0x00000000U
+#define FLASH_ACR_LATENCY_1WS          0x00000001U
+#define FLASH_ACR_LATENCY_2WS          0x00000002U
+#define FLASH_ACR_LATENCY_3WS          0x00000003U
+#define FLASH_ACR_LATENCY_4WS          0x00000004U
+#define FLASH_ACR_LATENCY_5WS          0x00000005U
+#define FLASH_ACR_LATENCY_6WS          0x00000006U
+#define FLASH_ACR_LATENCY_7WS          0x00000007U
+
+#define FLASH_ACR_PRFTEN_Pos           (8U)
+#define FLASH_ACR_PRFTEN_Msk           (0x1U << FLASH_ACR_PRFTEN_Pos)          /*!< 0x00000100 */
+#define FLASH_ACR_PRFTEN               FLASH_ACR_PRFTEN_Msk
+#define FLASH_ACR_ICEN_Pos             (9U)
+#define FLASH_ACR_ICEN_Msk             (0x1U << FLASH_ACR_ICEN_Pos)            /*!< 0x00000200 */
+#define FLASH_ACR_ICEN                 FLASH_ACR_ICEN_Msk
+#define FLASH_ACR_DCEN_Pos             (10U)
+#define FLASH_ACR_DCEN_Msk             (0x1U << FLASH_ACR_DCEN_Pos)            /*!< 0x00000400 */
+#define FLASH_ACR_DCEN                 FLASH_ACR_DCEN_Msk
+#define FLASH_ACR_ICRST_Pos            (11U)
+#define FLASH_ACR_ICRST_Msk            (0x1U << FLASH_ACR_ICRST_Pos)           /*!< 0x00000800 */
+#define FLASH_ACR_ICRST                FLASH_ACR_ICRST_Msk
+#define FLASH_ACR_DCRST_Pos            (12U)
+#define FLASH_ACR_DCRST_Msk            (0x1U << FLASH_ACR_DCRST_Pos)           /*!< 0x00001000 */
+#define FLASH_ACR_DCRST                FLASH_ACR_DCRST_Msk
+#define FLASH_ACR_BYTE0_ADDRESS_Pos    (10U)
+#define FLASH_ACR_BYTE0_ADDRESS_Msk    (0x10008FU << FLASH_ACR_BYTE0_ADDRESS_Pos) /*!< 0x40023C00 */
+#define FLASH_ACR_BYTE0_ADDRESS        FLASH_ACR_BYTE0_ADDRESS_Msk
+#define FLASH_ACR_BYTE2_ADDRESS_Pos    (0U)
+#define FLASH_ACR_BYTE2_ADDRESS_Msk    (0x40023C03U << FLASH_ACR_BYTE2_ADDRESS_Pos) /*!< 0x40023C03 */
+#define FLASH_ACR_BYTE2_ADDRESS        FLASH_ACR_BYTE2_ADDRESS_Msk
+
+/*******************  Bits definition for FLASH_SR register  ******************/
+#define FLASH_SR_EOP_Pos               (0U)
+#define FLASH_SR_EOP_Msk               (0x1U << FLASH_SR_EOP_Pos)              /*!< 0x00000001 */
+#define FLASH_SR_EOP                   FLASH_SR_EOP_Msk
+#define FLASH_SR_SOP_Pos               (1U)
+#define FLASH_SR_SOP_Msk               (0x1U << FLASH_SR_SOP_Pos)              /*!< 0x00000002 */
+#define FLASH_SR_SOP                   FLASH_SR_SOP_Msk
+#define FLASH_SR_WRPERR_Pos            (4U)
+#define FLASH_SR_WRPERR_Msk            (0x1U << FLASH_SR_WRPERR_Pos)           /*!< 0x00000010 */
+#define FLASH_SR_WRPERR                FLASH_SR_WRPERR_Msk
+#define FLASH_SR_PGAERR_Pos            (5U)
+#define FLASH_SR_PGAERR_Msk            (0x1U << FLASH_SR_PGAERR_Pos)           /*!< 0x00000020 */
+#define FLASH_SR_PGAERR                FLASH_SR_PGAERR_Msk
+#define FLASH_SR_PGPERR_Pos            (6U)
+#define FLASH_SR_PGPERR_Msk            (0x1U << FLASH_SR_PGPERR_Pos)           /*!< 0x00000040 */
+#define FLASH_SR_PGPERR                FLASH_SR_PGPERR_Msk
+#define FLASH_SR_PGSERR_Pos            (7U)
+#define FLASH_SR_PGSERR_Msk            (0x1U << FLASH_SR_PGSERR_Pos)           /*!< 0x00000080 */
+#define FLASH_SR_PGSERR                FLASH_SR_PGSERR_Msk
+#define FLASH_SR_BSY_Pos               (16U)
+#define FLASH_SR_BSY_Msk               (0x1U << FLASH_SR_BSY_Pos)              /*!< 0x00010000 */
+#define FLASH_SR_BSY                   FLASH_SR_BSY_Msk
+
+/*******************  Bits definition for FLASH_CR register  ******************/
+#define FLASH_CR_PG_Pos                (0U)
+#define FLASH_CR_PG_Msk                (0x1U << FLASH_CR_PG_Pos)               /*!< 0x00000001 */
+#define FLASH_CR_PG                    FLASH_CR_PG_Msk
+#define FLASH_CR_SER_Pos               (1U)
+#define FLASH_CR_SER_Msk               (0x1U << FLASH_CR_SER_Pos)              /*!< 0x00000002 */
+#define FLASH_CR_SER                   FLASH_CR_SER_Msk
+#define FLASH_CR_MER_Pos               (2U)
+#define FLASH_CR_MER_Msk               (0x1U << FLASH_CR_MER_Pos)              /*!< 0x00000004 */
+#define FLASH_CR_MER                   FLASH_CR_MER_Msk
+#define FLASH_CR_SNB_Pos               (3U)
+#define FLASH_CR_SNB_Msk               (0x1FU << FLASH_CR_SNB_Pos)             /*!< 0x000000F8 */
+#define FLASH_CR_SNB                   FLASH_CR_SNB_Msk
+#define FLASH_CR_SNB_0                 (0x01U << FLASH_CR_SNB_Pos)             /*!< 0x00000008 */
+#define FLASH_CR_SNB_1                 (0x02U << FLASH_CR_SNB_Pos)             /*!< 0x00000010 */
+#define FLASH_CR_SNB_2                 (0x04U << FLASH_CR_SNB_Pos)             /*!< 0x00000020 */
+#define FLASH_CR_SNB_3                 (0x08U << FLASH_CR_SNB_Pos)             /*!< 0x00000040 */
+#define FLASH_CR_SNB_4                 (0x10U << FLASH_CR_SNB_Pos)             /*!< 0x00000080 */
+#define FLASH_CR_PSIZE_Pos             (8U)
+#define FLASH_CR_PSIZE_Msk             (0x3U << FLASH_CR_PSIZE_Pos)            /*!< 0x00000300 */
+#define FLASH_CR_PSIZE                 FLASH_CR_PSIZE_Msk
+#define FLASH_CR_PSIZE_0               (0x1U << FLASH_CR_PSIZE_Pos)            /*!< 0x00000100 */
+#define FLASH_CR_PSIZE_1               (0x2U << FLASH_CR_PSIZE_Pos)            /*!< 0x00000200 */
+#define FLASH_CR_STRT_Pos              (16U)
+#define FLASH_CR_STRT_Msk              (0x1U << FLASH_CR_STRT_Pos)             /*!< 0x00010000 */
+#define FLASH_CR_STRT                  FLASH_CR_STRT_Msk
+#define FLASH_CR_EOPIE_Pos             (24U)
+#define FLASH_CR_EOPIE_Msk             (0x1U << FLASH_CR_EOPIE_Pos)            /*!< 0x01000000 */
+#define FLASH_CR_EOPIE                 FLASH_CR_EOPIE_Msk
+#define FLASH_CR_LOCK_Pos              (31U)
+#define FLASH_CR_LOCK_Msk              (0x1U << FLASH_CR_LOCK_Pos)             /*!< 0x80000000 */
+#define FLASH_CR_LOCK                  FLASH_CR_LOCK_Msk
+
+/*******************  Bits definition for FLASH_OPTCR register  ***************/
+#define FLASH_OPTCR_OPTLOCK_Pos        (0U)
+#define FLASH_OPTCR_OPTLOCK_Msk        (0x1U << FLASH_OPTCR_OPTLOCK_Pos)       /*!< 0x00000001 */
+#define FLASH_OPTCR_OPTLOCK            FLASH_OPTCR_OPTLOCK_Msk
+#define FLASH_OPTCR_OPTSTRT_Pos        (1U)
+#define FLASH_OPTCR_OPTSTRT_Msk        (0x1U << FLASH_OPTCR_OPTSTRT_Pos)       /*!< 0x00000002 */
+#define FLASH_OPTCR_OPTSTRT            FLASH_OPTCR_OPTSTRT_Msk
+
+#define FLASH_OPTCR_BOR_LEV_0          0x00000004U
+#define FLASH_OPTCR_BOR_LEV_1          0x00000008U
+#define FLASH_OPTCR_BOR_LEV_Pos        (2U)
+#define FLASH_OPTCR_BOR_LEV_Msk        (0x3U << FLASH_OPTCR_BOR_LEV_Pos)       /*!< 0x0000000C */
+#define FLASH_OPTCR_BOR_LEV            FLASH_OPTCR_BOR_LEV_Msk
+#define FLASH_OPTCR_WDG_SW_Pos         (5U)
+#define FLASH_OPTCR_WDG_SW_Msk         (0x1U << FLASH_OPTCR_WDG_SW_Pos)        /*!< 0x00000020 */
+#define FLASH_OPTCR_WDG_SW             FLASH_OPTCR_WDG_SW_Msk
+#define FLASH_OPTCR_nRST_STOP_Pos      (6U)
+#define FLASH_OPTCR_nRST_STOP_Msk      (0x1U << FLASH_OPTCR_nRST_STOP_Pos)     /*!< 0x00000040 */
+#define FLASH_OPTCR_nRST_STOP          FLASH_OPTCR_nRST_STOP_Msk
+#define FLASH_OPTCR_nRST_STDBY_Pos     (7U)
+#define FLASH_OPTCR_nRST_STDBY_Msk     (0x1U << FLASH_OPTCR_nRST_STDBY_Pos)    /*!< 0x00000080 */
+#define FLASH_OPTCR_nRST_STDBY         FLASH_OPTCR_nRST_STDBY_Msk
+#define FLASH_OPTCR_RDP_Pos            (8U)
+#define FLASH_OPTCR_RDP_Msk            (0xFFU << FLASH_OPTCR_RDP_Pos)          /*!< 0x0000FF00 */
+#define FLASH_OPTCR_RDP                FLASH_OPTCR_RDP_Msk
+#define FLASH_OPTCR_RDP_0              (0x01U << FLASH_OPTCR_RDP_Pos)          /*!< 0x00000100 */
+#define FLASH_OPTCR_RDP_1              (0x02U << FLASH_OPTCR_RDP_Pos)          /*!< 0x00000200 */
+#define FLASH_OPTCR_RDP_2              (0x04U << FLASH_OPTCR_RDP_Pos)          /*!< 0x00000400 */
+#define FLASH_OPTCR_RDP_3              (0x08U << FLASH_OPTCR_RDP_Pos)          /*!< 0x00000800 */
+#define FLASH_OPTCR_RDP_4              (0x10U << FLASH_OPTCR_RDP_Pos)          /*!< 0x00001000 */
+#define FLASH_OPTCR_RDP_5              (0x20U << FLASH_OPTCR_RDP_Pos)          /*!< 0x00002000 */
+#define FLASH_OPTCR_RDP_6              (0x40U << FLASH_OPTCR_RDP_Pos)          /*!< 0x00004000 */
+#define FLASH_OPTCR_RDP_7              (0x80U << FLASH_OPTCR_RDP_Pos)          /*!< 0x00008000 */
+#define FLASH_OPTCR_nWRP_Pos           (16U)
+#define FLASH_OPTCR_nWRP_Msk           (0xFFFU << FLASH_OPTCR_nWRP_Pos)        /*!< 0x0FFF0000 */
+#define FLASH_OPTCR_nWRP               FLASH_OPTCR_nWRP_Msk
+#define FLASH_OPTCR_nWRP_0             0x00010000U
+#define FLASH_OPTCR_nWRP_1             0x00020000U
+#define FLASH_OPTCR_nWRP_2             0x00040000U
+#define FLASH_OPTCR_nWRP_3             0x00080000U
+#define FLASH_OPTCR_nWRP_4             0x00100000U
+#define FLASH_OPTCR_nWRP_5             0x00200000U
+#define FLASH_OPTCR_nWRP_6             0x00400000U
+#define FLASH_OPTCR_nWRP_7             0x00800000U
+#define FLASH_OPTCR_nWRP_8             0x01000000U
+#define FLASH_OPTCR_nWRP_9             0x02000000U
+#define FLASH_OPTCR_nWRP_10            0x04000000U
+#define FLASH_OPTCR_nWRP_11            0x08000000U
+
+/******************  Bits definition for FLASH_OPTCR1 register  ***************/
+#define FLASH_OPTCR1_nWRP_Pos          (16U)
+#define FLASH_OPTCR1_nWRP_Msk          (0xFFFU << FLASH_OPTCR1_nWRP_Pos)       /*!< 0x0FFF0000 */
+#define FLASH_OPTCR1_nWRP              FLASH_OPTCR1_nWRP_Msk
+#define FLASH_OPTCR1_nWRP_0            (0x001U << FLASH_OPTCR1_nWRP_Pos)       /*!< 0x00010000 */
+#define FLASH_OPTCR1_nWRP_1            (0x002U << FLASH_OPTCR1_nWRP_Pos)       /*!< 0x00020000 */
+#define FLASH_OPTCR1_nWRP_2            (0x004U << FLASH_OPTCR1_nWRP_Pos)       /*!< 0x00040000 */
+#define FLASH_OPTCR1_nWRP_3            (0x008U << FLASH_OPTCR1_nWRP_Pos)       /*!< 0x00080000 */
+#define FLASH_OPTCR1_nWRP_4            (0x010U << FLASH_OPTCR1_nWRP_Pos)       /*!< 0x00100000 */
+#define FLASH_OPTCR1_nWRP_5            (0x020U << FLASH_OPTCR1_nWRP_Pos)       /*!< 0x00200000 */
+#define FLASH_OPTCR1_nWRP_6            (0x040U << FLASH_OPTCR1_nWRP_Pos)       /*!< 0x00400000 */
+#define FLASH_OPTCR1_nWRP_7            (0x080U << FLASH_OPTCR1_nWRP_Pos)       /*!< 0x00800000 */
+#define FLASH_OPTCR1_nWRP_8            (0x100U << FLASH_OPTCR1_nWRP_Pos)       /*!< 0x01000000 */
+#define FLASH_OPTCR1_nWRP_9            (0x200U << FLASH_OPTCR1_nWRP_Pos)       /*!< 0x02000000 */
+#define FLASH_OPTCR1_nWRP_10           (0x400U << FLASH_OPTCR1_nWRP_Pos)       /*!< 0x04000000 */
+#define FLASH_OPTCR1_nWRP_11           (0x800U << FLASH_OPTCR1_nWRP_Pos)       /*!< 0x08000000 */
 
 /******************************************************************************/
 /*                                                                            */
@@ -997,6 +1348,146 @@ typedef struct
 #define RCC_PLLI2SCFGR_PLLI2SR_1           (0x2U << RCC_PLLI2SCFGR_PLLI2SR_Pos) /*!< 0x20000000 */
 #define RCC_PLLI2SCFGR_PLLI2SR_2           (0x4U << RCC_PLLI2SCFGR_PLLI2SR_Pos) /*!< 0x40000000 */
 
+
+/******************************************************************************/
+/*                                                                            */
+/*                         Reset and Clock Control                            */
+/*                                                                            */
+/******************************************************************************/
+/* SCB CPUID Register Definitions */
+#define SCB_CPUID_IMPLEMENTER_Pos          24U                                            /*!< SCB CPUID: IMPLEMENTER Position */
+#define SCB_CPUID_IMPLEMENTER_Msk          (0xFFUL << SCB_CPUID_IMPLEMENTER_Pos)          /*!< SCB CPUID: IMPLEMENTER Mask */
+#define SCB_CPUID_VARIANT_Pos              20U                                            /*!< SCB CPUID: VARIANT Position */
+#define SCB_CPUID_VARIANT_Msk              (0xFUL << SCB_CPUID_VARIANT_Pos)               /*!< SCB CPUID: VARIANT Mask */
+#define SCB_CPUID_ARCHITECTURE_Pos         16U                                            /*!< SCB CPUID: ARCHITECTURE Position */
+#define SCB_CPUID_ARCHITECTURE_Msk         (0xFUL << SCB_CPUID_ARCHITECTURE_Pos)          /*!< SCB CPUID: ARCHITECTURE Mask */
+#define SCB_CPUID_PARTNO_Pos                4U                                            /*!< SCB CPUID: PARTNO Position */
+#define SCB_CPUID_PARTNO_Msk               (0xFFFUL << SCB_CPUID_PARTNO_Pos)              /*!< SCB CPUID: PARTNO Mask */
+#define SCB_CPUID_REVISION_Pos              0U                                            /*!< SCB CPUID: REVISION Position */
+#define SCB_CPUID_REVISION_Msk             (0xFUL /*<< SCB_CPUID_REVISION_Pos*/)          /*!< SCB CPUID: REVISION Mask */
+
+/* SCB Interrupt Control State Register Definitions */
+#define SCB_ICSR_NMIPENDSET_Pos            31U                                            /*!< SCB ICSR: NMIPENDSET Position */
+#define SCB_ICSR_NMIPENDSET_Msk            (1UL << SCB_ICSR_NMIPENDSET_Pos)               /*!< SCB ICSR: NMIPENDSET Mask */
+#define SCB_ICSR_PENDSVSET_Pos             28U                                            /*!< SCB ICSR: PENDSVSET Position */
+#define SCB_ICSR_PENDSVSET_Msk             (1UL << SCB_ICSR_PENDSVSET_Pos)                /*!< SCB ICSR: PENDSVSET Mask */
+#define SCB_ICSR_PENDSVCLR_Pos             27U                                            /*!< SCB ICSR: PENDSVCLR Position */
+#define SCB_ICSR_PENDSVCLR_Msk             (1UL << SCB_ICSR_PENDSVCLR_Pos)                /*!< SCB ICSR: PENDSVCLR Mask */
+#define SCB_ICSR_PENDSTSET_Pos             26U                                            /*!< SCB ICSR: PENDSTSET Position */
+#define SCB_ICSR_PENDSTSET_Msk             (1UL << SCB_ICSR_PENDSTSET_Pos)                /*!< SCB ICSR: PENDSTSET Mask */
+#define SCB_ICSR_PENDSTCLR_Pos             25U                                            /*!< SCB ICSR: PENDSTCLR Position */
+#define SCB_ICSR_PENDSTCLR_Msk             (1UL << SCB_ICSR_PENDSTCLR_Pos)                /*!< SCB ICSR: PENDSTCLR Mask */
+#define SCB_ICSR_ISRPREEMPT_Pos            23U                                            /*!< SCB ICSR: ISRPREEMPT Position */
+#define SCB_ICSR_ISRPREEMPT_Msk            (1UL << SCB_ICSR_ISRPREEMPT_Pos)               /*!< SCB ICSR: ISRPREEMPT Mask */
+#define SCB_ICSR_ISRPENDING_Pos            22U                                            /*!< SCB ICSR: ISRPENDING Position */
+#define SCB_ICSR_ISRPENDING_Msk            (1UL << SCB_ICSR_ISRPENDING_Pos)               /*!< SCB ICSR: ISRPENDING Mask */
+#define SCB_ICSR_VECTPENDING_Pos           12U                                            /*!< SCB ICSR: VECTPENDING Position */
+#define SCB_ICSR_VECTPENDING_Msk           (0x1FFUL << SCB_ICSR_VECTPENDING_Pos)          /*!< SCB ICSR: VECTPENDING Mask */
+#define SCB_ICSR_RETTOBASE_Pos             11U                                            /*!< SCB ICSR: RETTOBASE Position */
+#define SCB_ICSR_RETTOBASE_Msk             (1UL << SCB_ICSR_RETTOBASE_Pos)                /*!< SCB ICSR: RETTOBASE Mask */
+#define SCB_ICSR_VECTACTIVE_Pos             0U                                            /*!< SCB ICSR: VECTACTIVE Position */
+#define SCB_ICSR_VECTACTIVE_Msk            (0x1FFUL /*<< SCB_ICSR_VECTACTIVE_Pos*/)       /*!< SCB ICSR: VECTACTIVE Mask */
+
+/* SCB Vector Table Offset Register Definitions */
+#define SCB_VTOR_TBLOFF_Pos                 7U                                            /*!< SCB VTOR: TBLOFF Position */
+#define SCB_VTOR_TBLOFF_Msk                (0x1FFFFFFUL << SCB_VTOR_TBLOFF_Pos)           /*!< SCB VTOR: TBLOFF Mask */
+
+/* SCB Application Interrupt and Reset Control Register Definitions */
+#define SCB_AIRCR_VECTKEY_Pos              16U                                            /*!< SCB AIRCR: VECTKEY Position */
+#define SCB_AIRCR_VECTKEY_Msk              (0xFFFFUL << SCB_AIRCR_VECTKEY_Pos)            /*!< SCB AIRCR: VECTKEY Mask */
+#define SCB_AIRCR_VECTKEYSTAT_Pos          16U                                            /*!< SCB AIRCR: VECTKEYSTAT Position */
+#define SCB_AIRCR_VECTKEYSTAT_Msk          (0xFFFFUL << SCB_AIRCR_VECTKEYSTAT_Pos)        /*!< SCB AIRCR: VECTKEYSTAT Mask */
+#define SCB_AIRCR_ENDIANESS_Pos            15U                                            /*!< SCB AIRCR: ENDIANESS Position */
+#define SCB_AIRCR_ENDIANESS_Msk            (1UL << SCB_AIRCR_ENDIANESS_Pos)               /*!< SCB AIRCR: ENDIANESS Mask */
+#define SCB_AIRCR_PRIGROUP_Pos              8U                                            /*!< SCB AIRCR: PRIGROUP Position */
+#define SCB_AIRCR_PRIGROUP_Msk             (7UL << SCB_AIRCR_PRIGROUP_Pos)                /*!< SCB AIRCR: PRIGROUP Mask */
+#define SCB_AIRCR_SYSRESETREQ_Pos           2U                                            /*!< SCB AIRCR: SYSRESETREQ Position */
+#define SCB_AIRCR_SYSRESETREQ_Msk          (1UL << SCB_AIRCR_SYSRESETREQ_Pos)             /*!< SCB AIRCR: SYSRESETREQ Mask */
+#define SCB_AIRCR_VECTCLRACTIVE_Pos         1U                                            /*!< SCB AIRCR: VECTCLRACTIVE Position */
+#define SCB_AIRCR_VECTCLRACTIVE_Msk        (1UL << SCB_AIRCR_VECTCLRACTIVE_Pos)           /*!< SCB AIRCR: VECTCLRACTIVE Mask */
+#define SCB_AIRCR_VECTRESET_Pos             0U                                            /*!< SCB AIRCR: VECTRESET Position */
+#define SCB_AIRCR_VECTRESET_Msk            (1UL /*<< SCB_AIRCR_VECTRESET_Pos*/)           /*!< SCB AIRCR: VECTRESET Mask */
+
+/* SCB System Control Register Definitions */
+#define SCB_SCR_SEVONPEND_Pos               4U                                            /*!< SCB SCR: SEVONPEND Position */
+#define SCB_SCR_SEVONPEND_Msk              (1UL << SCB_SCR_SEVONPEND_Pos)                 /*!< SCB SCR: SEVONPEND Mask */
+#define SCB_SCR_SLEEPDEEP_Pos               2U                                            /*!< SCB SCR: SLEEPDEEP Position */
+#define SCB_SCR_SLEEPDEEP_Msk              (1UL << SCB_SCR_SLEEPDEEP_Pos)                 /*!< SCB SCR: SLEEPDEEP Mask */
+#define SCB_SCR_SLEEPONEXIT_Pos             1U                                            /*!< SCB SCR: SLEEPONEXIT Position */
+#define SCB_SCR_SLEEPONEXIT_Msk            (1UL << SCB_SCR_SLEEPONEXIT_Pos)               /*!< SCB SCR: SLEEPONEXIT Mask */
+
+/* SCB Configuration Control Register Definitions */
+#define SCB_CCR_STKALIGN_Pos                9U                                            /*!< SCB CCR: STKALIGN Position */
+#define SCB_CCR_STKALIGN_Msk               (1UL << SCB_CCR_STKALIGN_Pos)                  /*!< SCB CCR: STKALIGN Mask */
+#define SCB_CCR_BFHFNMIGN_Pos               8U                                            /*!< SCB CCR: BFHFNMIGN Position */
+#define SCB_CCR_BFHFNMIGN_Msk              (1UL << SCB_CCR_BFHFNMIGN_Pos)                 /*!< SCB CCR: BFHFNMIGN Mask */
+#define SCB_CCR_DIV_0_TRP_Pos               4U                                            /*!< SCB CCR: DIV_0_TRP Position */
+#define SCB_CCR_DIV_0_TRP_Msk              (1UL << SCB_CCR_DIV_0_TRP_Pos)                 /*!< SCB CCR: DIV_0_TRP Mask */
+#define SCB_CCR_UNALIGN_TRP_Pos             3U                                            /*!< SCB CCR: UNALIGN_TRP Position */
+#define SCB_CCR_UNALIGN_TRP_Msk            (1UL << SCB_CCR_UNALIGN_TRP_Pos)               /*!< SCB CCR: UNALIGN_TRP Mask */
+#define SCB_CCR_USERSETMPEND_Pos            1U                                            /*!< SCB CCR: USERSETMPEND Position */
+#define SCB_CCR_USERSETMPEND_Msk           (1UL << SCB_CCR_USERSETMPEND_Pos)              /*!< SCB CCR: USERSETMPEND Mask */
+#define SCB_CCR_NONBASETHRDENA_Pos          0U                                            /*!< SCB CCR: NONBASETHRDENA Position */
+#define SCB_CCR_NONBASETHRDENA_Msk         (1UL /*<< SCB_CCR_NONBASETHRDENA_Pos*/)        /*!< SCB CCR: NONBASETHRDENA Mask */
+
+/* SCB System Handler Control and State Register Definitions */
+#define SCB_SHCSR_USGFAULTENA_Pos          18U                                            /*!< SCB SHCSR: USGFAULTENA Position */
+#define SCB_SHCSR_USGFAULTENA_Msk          (1UL << SCB_SHCSR_USGFAULTENA_Pos)             /*!< SCB SHCSR: USGFAULTENA Mask */
+#define SCB_SHCSR_BUSFAULTENA_Pos          17U                                            /*!< SCB SHCSR: BUSFAULTENA Position */
+#define SCB_SHCSR_BUSFAULTENA_Msk          (1UL << SCB_SHCSR_BUSFAULTENA_Pos)             /*!< SCB SHCSR: BUSFAULTENA Mask */
+#define SCB_SHCSR_MEMFAULTENA_Pos          16U                                            /*!< SCB SHCSR: MEMFAULTENA Position */
+#define SCB_SHCSR_MEMFAULTENA_Msk          (1UL << SCB_SHCSR_MEMFAULTENA_Pos)             /*!< SCB SHCSR: MEMFAULTENA Mask */
+#define SCB_SHCSR_SVCALLPENDED_Pos         15U                                            /*!< SCB SHCSR: SVCALLPENDED Position */
+#define SCB_SHCSR_SVCALLPENDED_Msk         (1UL << SCB_SHCSR_SVCALLPENDED_Pos)            /*!< SCB SHCSR: SVCALLPENDED Mask */
+
+#define SCB_SHCSR_BUSFAULTPENDED_Pos       14U                                            /*!< SCB SHCSR: BUSFAULTPENDED Position */
+#define SCB_SHCSR_BUSFAULTPENDED_Msk       (1UL << SCB_SHCSR_BUSFAULTPENDED_Pos)          /*!< SCB SHCSR: BUSFAULTPENDED Mask */
+#define SCB_SHCSR_MEMFAULTPENDED_Pos       13U                                            /*!< SCB SHCSR: MEMFAULTPENDED Position */
+#define SCB_SHCSR_MEMFAULTPENDED_Msk       (1UL << SCB_SHCSR_MEMFAULTPENDED_Pos)          /*!< SCB SHCSR: MEMFAULTPENDED Mask */
+#define SCB_SHCSR_USGFAULTPENDED_Pos       12U                                            /*!< SCB SHCSR: USGFAULTPENDED Position */
+#define SCB_SHCSR_USGFAULTPENDED_Msk       (1UL << SCB_SHCSR_USGFAULTPENDED_Pos)          /*!< SCB SHCSR: USGFAULTPENDED Mask */
+#define SCB_SHCSR_SYSTICKACT_Pos           11U                                            /*!< SCB SHCSR: SYSTICKACT Position */
+#define SCB_SHCSR_SYSTICKACT_Msk           (1UL << SCB_SHCSR_SYSTICKACT_Pos)              /*!< SCB SHCSR: SYSTICKACT Mask */
+#define SCB_SHCSR_PENDSVACT_Pos            10U                                            /*!< SCB SHCSR: PENDSVACT Position */
+#define SCB_SHCSR_PENDSVACT_Msk            (1UL << SCB_SHCSR_PENDSVACT_Pos)               /*!< SCB SHCSR: PENDSVACT Mask */
+#define SCB_SHCSR_MONITORACT_Pos            8U                                            /*!< SCB SHCSR: MONITORACT Position */
+#define SCB_SHCSR_MONITORACT_Msk           (1UL << SCB_SHCSR_MONITORACT_Pos)              /*!< SCB SHCSR: MONITORACT Mask */
+#define SCB_SHCSR_SVCALLACT_Pos             7U                                            /*!< SCB SHCSR: SVCALLACT Position */
+#define SCB_SHCSR_SVCALLACT_Msk            (1UL << SCB_SHCSR_SVCALLACT_Pos)               /*!< SCB SHCSR: SVCALLACT Mask */
+#define SCB_SHCSR_USGFAULTACT_Pos           3U                                            /*!< SCB SHCSR: USGFAULTACT Position */
+#define SCB_SHCSR_USGFAULTACT_Msk          (1UL << SCB_SHCSR_USGFAULTACT_Pos)             /*!< SCB SHCSR: USGFAULTACT Mask */
+#define SCB_SHCSR_BUSFAULTACT_Pos           1U                                            /*!< SCB SHCSR: BUSFAULTACT Position */
+#define SCB_SHCSR_BUSFAULTACT_Msk          (1UL << SCB_SHCSR_BUSFAULTACT_Pos)             /*!< SCB SHCSR: BUSFAULTACT Mask */
+#define SCB_SHCSR_MEMFAULTACT_Pos           0U                                            /*!< SCB SHCSR: MEMFAULTACT Position */
+#define SCB_SHCSR_MEMFAULTACT_Msk          (1UL /*<< SCB_SHCSR_MEMFAULTACT_Pos*/)         /*!< SCB SHCSR: MEMFAULTACT Mask */
+
+/* SCB Configurable Fault Status Register Definitions */
+#define SCB_CFSR_USGFAULTSR_Pos            16U                                            /*!< SCB CFSR: Usage Fault Status Register Position */
+#define SCB_CFSR_USGFAULTSR_Msk            (0xFFFFUL << SCB_CFSR_USGFAULTSR_Pos)          /*!< SCB CFSR: Usage Fault Status Register Mask */
+#define SCB_CFSR_BUSFAULTSR_Pos             8U                                            /*!< SCB CFSR: Bus Fault Status Register Position */
+#define SCB_CFSR_BUSFAULTSR_Msk            (0xFFUL << SCB_CFSR_BUSFAULTSR_Pos)            /*!< SCB CFSR: Bus Fault Status Register Mask */
+#define SCB_CFSR_MEMFAULTSR_Pos             0U                                            /*!< SCB CFSR: Memory Manage Fault Status Register Position */
+#define SCB_CFSR_MEMFAULTSR_Msk            (0xFFUL /*<< SCB_CFSR_MEMFAULTSR_Pos*/)        /*!< SCB CFSR: Memory Manage Fault Status Register Mask */
+
+/* SCB Hard Fault Status Register Definitions */
+#define SCB_HFSR_DEBUGEVT_Pos              31U                                            /*!< SCB HFSR: DEBUGEVT Position */
+#define SCB_HFSR_DEBUGEVT_Msk              (1UL << SCB_HFSR_DEBUGEVT_Pos)                 /*!< SCB HFSR: DEBUGEVT Mask */
+#define SCB_HFSR_FORCED_Pos                30U                                            /*!< SCB HFSR: FORCED Position */
+#define SCB_HFSR_FORCED_Msk                (1UL << SCB_HFSR_FORCED_Pos)                   /*!< SCB HFSR: FORCED Mask */
+#define SCB_HFSR_VECTTBL_Pos                1U                                            /*!< SCB HFSR: VECTTBL Position */
+#define SCB_HFSR_VECTTBL_Msk               (1UL << SCB_HFSR_VECTTBL_Pos)                  /*!< SCB HFSR: VECTTBL Mask */
+
+/* SCB Debug Fault Status Register Definitions */
+#define SCB_DFSR_EXTERNAL_Pos               4U                                            /*!< SCB DFSR: EXTERNAL Position */
+#define SCB_DFSR_EXTERNAL_Msk              (1UL << SCB_DFSR_EXTERNAL_Pos)                 /*!< SCB DFSR: EXTERNAL Mask */
+#define SCB_DFSR_VCATCH_Pos                 3U                                            /*!< SCB DFSR: VCATCH Position */
+#define SCB_DFSR_VCATCH_Msk                (1UL << SCB_DFSR_VCATCH_Pos)                   /*!< SCB DFSR: VCATCH Mask */
+#define SCB_DFSR_DWTTRAP_Pos                2U                                            /*!< SCB DFSR: DWTTRAP Position */
+#define SCB_DFSR_DWTTRAP_Msk               (1UL << SCB_DFSR_DWTTRAP_Pos)                  /*!< SCB DFSR: DWTTRAP Mask */
+#define SCB_DFSR_BKPT_Pos                   1U                                            /*!< SCB DFSR: BKPT Position */
+#define SCB_DFSR_BKPT_Msk                  (1UL << SCB_DFSR_BKPT_Pos)                     /*!< SCB DFSR: BKPT Mask */
+#define SCB_DFSR_HALTED_Pos                 0U                                            /*!< SCB DFSR: HALTED Position */
+#define SCB_DFSR_HALTED_Msk                (1UL /*<< SCB_DFSR_HALTED_Pos*/)               /*!< SCB DFSR: HALTED Mask */
 
 
 

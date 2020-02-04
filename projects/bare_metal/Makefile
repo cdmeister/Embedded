@@ -70,7 +70,7 @@ vector_table.o: vector_table.c
 dynamic_memory.o: dynamic_memory.c
 	$(CC) $(CFLAGS) -c dynamic_memory.c
 
-main.o:
+main.o: main.c
 	$(CC) $(CFLAGS) -c main.c
 
 
