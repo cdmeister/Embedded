@@ -20,6 +20,7 @@ FPU = -mfpu=fpv4-sp-d16
 FLOAT-ABI = -mfloat-abi=hard
 MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
 GCC_STANDARD = -std=c90
+DEPENDECY = -MMD
 
 # Additional DEBUG Flag
 OPT = -O3
@@ -34,7 +35,7 @@ endif
 
 # Compiler Flags
 #CFLAGS += -ffreestanding
-CFLAGS += $(MCU) $(DEBUG_FLAG) $(OPT) $(GCC_STANDARD) \
+CFLAGS += $(MCU) $(DEBUG_FLAG) $(OPT) $(GCC_STANDARD) $(DEPENDECY)\
 					-ffreestanding -ffunction-sections -nostdlib \
 					-fdata-sections
 
@@ -60,23 +61,21 @@ $(TARGET).bin: $(TARGET).elf
 $(TARGET).elf: startup.o vector_table.o dynamic_memory.o main.o
 	$(LD) startup.o vector_table.o dynamic_memory.o main.o $(LDFLAGS) -o bare_metal.elf
 
-startup.o: startup.c linker_defines.h
+startup.o: startup.c
 	$(CC) $(CFLAGS) -c startup.c
 
-vector_table.o: vector_table.c linker_defines.h
+vector_table.o: vector_table.c
 	$(CC) $(CFLAGS) -c vector_table.c
 
-dynamic_memory.o: dynamic_memory.c linker_defines.h
+dynamic_memory.o: dynamic_memory.c
 	$(CC) $(CFLAGS) -c dynamic_memory.c
 
-main.o:
+main.o: main.c
 	$(CC) $(CFLAGS) -c main.c
 
 
-
-
-
 .PHONY: clean nuke
+-include *.d
 
 make nuke:
-	-rm -rf *.o *.elf *.bin *.hex *.map
+	-rm -rf *.o *.d *.elf *.bin *.hex *.map
