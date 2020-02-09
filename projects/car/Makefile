@@ -1,5 +1,5 @@
 # Target name of final executable
-TARGET = bare_metal
+TARGET = car
 
 # DEBUG
 DEBUG = 1
