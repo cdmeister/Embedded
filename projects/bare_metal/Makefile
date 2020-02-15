@@ -6,6 +6,11 @@ DEBUG = 1
 
 # Build Directory
 BUILD_DIR = build
+SRC_DIR  = .
+SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
+OBJ_FILES = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC_FILES))
+$(info SRC_FILES is $(SRC_FILES))
+$(info OBJ_FILES is $(OBJ_FILES))
 
 # Tools to use
 CROSS_COMPILE = arm-none-eabi-
@@ -55,27 +60,32 @@ LDFLAGS = -T$(LSCRIPT)  $(MCU) -nostdlib $(LIBS) -Wl,-Map=map.map -Wl,--cref -Wl
 
 all: $(TARGET).bin
 
-$(TARGET).bin: $(TARGET).elf
+$(TARGET).bin: $(TARGET).elf | $(BUILD_DIR)
 	$(CP) -O binary $< $@
 
-$(TARGET).elf: startup.o vector_table.o dynamic_memory.o main.o
-	$(LD) startup.o vector_table.o dynamic_memory.o main.o $(LDFLAGS) -o bare_metal.elf
+$(TARGET).elf: $(OBJ_FILES) | $(BUILD_DIR)
+	$(LD)  $(LDFLAGS) -o $@ $^
 
-startup.o: startup.c
-	$(CC) $(CFLAGS) -c startup.c
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
+	$(CC) $(CFLAGS)  -c -o $@ $<
 
-vector_table.o: vector_table.c
-	$(CC) $(CFLAGS) -c vector_table.c
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+#startup.o: startup.c
+	#$(CC) $(CFLAGS) -c startup.c
 
-dynamic_memory.o: dynamic_memory.c
-	$(CC) $(CFLAGS) -c dynamic_memory.c
+#vector_table.o: vector_table.c
+	#$(CC) $(CFLAGS) -c vector_table.c
 
-main.o: main.c
-	$(CC) $(CFLAGS) -c main.c
+#dynamic_memory.o: dynamic_memory.c
+#	$(CC) $(CFLAGS) -c dynamic_memory.c
+
+#main.o: main.c
+#	$(CC) $(CFLAGS) -c main.c
 
 
 .PHONY: clean nuke
--include *.d
+-include $(OBJ_FILES:.o=.d)
 
 make nuke:
-	-rm -rf *.o *.d *.elf *.bin *.hex *.map
+	-rm -rf *.o *.d *.elf *.bin *.hex *.map $(BUILD_DIR)
