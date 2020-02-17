@@ -5,9 +5,8 @@
 #ifndef _MOTOR_H_
 #define _MOTOR_H_
 
-#include "stm32f407.h"
+#include "stm32f407xx.h"
 
-uint32_t
 
 
 

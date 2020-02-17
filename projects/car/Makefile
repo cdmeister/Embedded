@@ -7,7 +7,8 @@ DEBUG = 1
 # Build Directory
 BUILD_DIR = build
 SRC_DIR  = .
-SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
+SRC_FILES := $(wildcard $(SRC_DIR)/*.c)
+SRC_FILES := $(filter-out $(SRC_DIR)/systick.c, $(SRC_FILES))
 OBJ_FILES = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC_FILES))
 $(info SRC_FILES is $(SRC_FILES))
 $(info OBJ_FILES is $(OBJ_FILES))
