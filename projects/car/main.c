@@ -11,9 +11,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f407xx.h"
-
-
-
+#include "usart.h"
+#include "L6205.h"
+#include "pushbutton.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -79,10 +79,15 @@ int main(void)
   GPIOD->PUPDR &= ~(GPIO_PUPDR_PUPD12 | GPIO_PUPDR_PUPD13
                   | GPIO_PUPDR_PUPD14 | GPIO_PUPDR_PUPD15); /*no pul-up, no pull-down*/
 
-
+  L6205_init(GPIOB,TIM3);
+  USARTx_Init(USART2);
+  pushbutton_init(GPIOC,ADC1);
+  USART_print(USART2,"Hello World\r\n");
+  GPIOB->BSRR = (0xF0);
   /* Infinite loop */
   while (1)
   {
+  USART_printnum(USART2,getADCx_coordinate());
     GPIOD->ODR |=PORTD_12;
     for(delay= 0; delay < 1066667; delay++);
     GPIOD->ODR &=~PORTD_12;
