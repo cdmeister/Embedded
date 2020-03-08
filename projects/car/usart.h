@@ -21,6 +21,8 @@
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 
+void buffer_Init (void);
+
 void USARTx_Init(USART_TypeDef * USARTx);
 
 void USART_print(USART_TypeDef * USARTx, const char * fmt);

@@ -82,12 +82,15 @@ int main(void)
   L6205_init(GPIOB,TIM3);
   USARTx_Init(USART2);
   pushbutton_init(GPIOC,ADC1);
-  USART_print(USART2,"Hello World\r\n");
+  USART_print(USART2,"9ello World\r\n");
   GPIOB->BSRR = (0xF0);
   /* Infinite loop */
+  USART_print(USART2,"*ello World\r\n");
   while (1)
   {
-  USART_printnum(USART2,getADCx_coordinate());
+    USART_print(USART2,"Jello Shot\r\n");
+    for(delay= 0; delay < 1067; delay++);
+ /* USART_printnum(USART2,getADCx_coordinate());
     GPIOD->ODR |=PORTD_12;
     for(delay= 0; delay < 1066667; delay++);
     GPIOD->ODR &=~PORTD_12;
@@ -111,9 +114,8 @@ int main(void)
     for(delay= 0; delay < 1066667; delay++);
     GPIOD->ODR &=~PORTD_ALL;
     for(delay= 0; delay < 1066667; delay++);
-
+*/
   }
-
   return 0;
 }
 
