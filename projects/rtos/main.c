@@ -1,46 +1,108 @@
 #include "stm32f407xx.h"
-#include "stdlib.h"
-#include "string.h"
-
-/* Work out end of RAM address as intial stack pointer, Use both
- * (specific of a given STM32 MCU)
-*/
-#define SRAM_SIZE            128 * 1024 /* STM32F4O7 has 128 KB of RAM */
-#define SRAM_END             (SRAM1_BASE + SRAM_SIZE)
-#define RCC_AHB1ENR           ((uint32_t*)(RCC_BASE+ 0x30))
+#include "systick.h"
+#include "task_managment.h"
+#include "scheduler.h"
 
 
 
-volatile uint32_t __attribute__((used)) dataVar = 0x3F;
-volatile uint32_t __attribute__((used)) bssVar;
-const uint32_t val = 1111;
-const char msg[] = "Hello World";
 
-void delay ( uint32_t count);
+void blue_led_off(void){
+
+  GPIOD->BSRR |= GPIO_BSRR_BR15;
+}
+void blue_led_on(void){
+
+  GPIOD->BSRR |= GPIO_BSRR_BS15;
+}
+
+void red_led_off(void){
+
+  GPIOD->BSRR |= GPIO_BSRR_BR14;
+}
+void red_led_on(void){
+
+  GPIOD->BSRR |= GPIO_BSRR_BS14;
+}
+
+
+void task_test0(void *arg)
+{
+    uint32_t now = jiffies;
+    blue_led_on();
+    while(1) {
+        if ((jiffies - now) > 1000) {
+            blue_led_off();
+            schedule();
+            now = jiffies;
+            blue_led_on();
+        }
+    }
+}
+
+void task_test1(void *arg)
+{
+    uint32_t now = jiffies;
+    red_led_on();
+    while(1) {
+        if ((jiffies - now) > 1000) {
+            red_led_off();
+            schedule();
+            now = jiffies;
+            red_led_on();
+        }
+    }
+}
 
 
 int main() {
-  const uint32_t * p = &val;
-  const uint32_t size_string = strlen(msg);
-  char * heapMsg =(char *)malloc(sizeof(char)* size_string);
-  strcpy(heapMsg,msg);
-  /* Enable clock on GPIOA peripheral */
-  *RCC_AHB1ENR |= (0x1<<0x3U);
-  /* Configure the PA5 as output pull-up */
-  GPIOD->MODER |= GPIO_MODER_MODE12_0; /* Sets MODER[11:10] = 0x1*/
-  bssVar = 0x3F;
-  free(heapMsg);
-  while(bssVar == dataVar) {
-    /* CORTEX M4F only support single precision hence the X.XXF */
-    GPIOD->ODR ^= 0x1000;
-    delay(200000);
-    GPIOD->ODR ^= 0x0000;
-    delay(200000);
+  Systick_Init(SystemCoreClock/1000);
+
+    /* Enable Clock */
+  RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
+
+
+  /* Set mode of all pins as digital output
+   *  00 = digital input       01 = digital output
+   *  10 = alternate function  11 = analog (default)
+   */
+  GPIOD->MODER &= ~(GPIO_MODER_MODE12 | GPIO_MODER_MODE13
+                   | GPIO_MODER_MODE14 | GPIO_MODER_MODE15); /* Clear mode bits */
+  GPIOD->MODER |= (GPIO_MODER_MODE12_0 | GPIO_MODER_MODE13_0
+                   | GPIO_MODER_MODE14_0 | GPIO_MODER_MODE15_0);/* LED 5-8 are on GPIOD Pins 12-15 */
+
+  /* Set output type of all pins as push-pull
+   * 0 = push-pull (default)
+   * 1 = open-drain
+   */
+  GPIOD->OTYPER &= ~(GPIO_OTYPER_OT12 | GPIO_OTYPER_OT13 |
+                   GPIO_OTYPER_OT14 | GPIO_OTYPER_OT15); /*Configure as output open-drain */
+
+  /* Set output speed of all pins as high
+   * 00 = Low speed           01 = Medium speed
+   * 10 = Fast speed          11 = High speed
+   */
+  GPIOD->OSPEEDR &=~(GPIO_OSPEEDR_OSPEED12 | GPIO_OSPEEDR_OSPEED13 | /* Configure as high speed */
+                    GPIO_OSPEEDR_OSPEED14 | GPIO_OSPEEDR_OSPEED15); /* Configure as high speed */
+  GPIOD->OSPEEDR |= (GPIO_OSPEEDR_OSPEED12 | GPIO_OSPEEDR_OSPEED13 |
+                    GPIO_OSPEEDR_OSPEED14 | GPIO_OSPEEDR_OSPEED15);
+
+  /* Set all pins as no pull-up, no pull-down
+   * 00 = no pull-up, no pull-down    01 = pull-up
+   * 10 = pull-down,                  11 = reserved
+   */
+  GPIOD->PUPDR &= ~(GPIO_PUPDR_PUPD12 | GPIO_PUPDR_PUPD13
+                  | GPIO_PUPDR_PUPD14 | GPIO_PUPDR_PUPD15); /*no pul-up, no pull-down*/
+
+
+  kernel.name[0]= 0;
+  kernel.id = 0;
+  kernel.state = TASK_RUNNING;
+  task_create("test0",task_test0,NULL);
+  task_create("test1",task_test1,NULL);
+  while(1){
+    schedule();
   }
-  for(;;);
+
   return 0;
 }
-void delay(uint32_t count) {
-  if(count > 100){count +=val;}
-  while(count--);
-}
+
