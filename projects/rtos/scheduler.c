@@ -1,6 +1,9 @@
 #include "scheduler.h"
+#include "task_management.h"
 
 extern int running_task_id;
+extern struct task_block TASKS[MAX_TASKS];
+extern int n_tasks;
 void schedule(){
   SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
 }

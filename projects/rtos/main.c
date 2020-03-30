@@ -1,9 +1,12 @@
 #include "stm32f407xx.h"
 #include "systick.h"
-#include "task_managment.h"
+#include "task_management.h"
 #include "scheduler.h"
 
+extern uint32_t SystemCoreClock;          /*!< System Clock Frequency (Core Clock) */
+extern struct task_block TASKS[MAX_TASKS];
 
+#define kernel TASKS[0]
 
 
 void blue_led_off(void){
@@ -15,6 +18,10 @@ void blue_led_on(void){
   GPIOD->BSRR |= GPIO_BSRR_BS15;
 }
 
+void blue_led_toggle(void){
+  GPIOD->ODR ^= GPIO_ODR_ODR_15;
+}
+
 void red_led_off(void){
 
   GPIOD->BSRR |= GPIO_BSRR_BR14;
@@ -24,39 +31,49 @@ void red_led_on(void){
   GPIOD->BSRR |= GPIO_BSRR_BS14;
 }
 
+void red_led_toggle(void){
+  GPIOD->ODR ^= GPIO_ODR_ODR_14;
+}
+
+
 
 void task_test0(void *arg)
 {
-    uint32_t now = jiffies;
-    blue_led_on();
+    uint32_t now = millis();
+    /*blue_led_on();*/
     while(1) {
-        if ((jiffies - now) > 1000) {
-            blue_led_off();
-            schedule();
-            now = jiffies;
-            blue_led_on();
+        if ((millis() - now) > 1000) {
+
+            /*blue_led_off();
+            schedule();*/
+            now = millis();
+            /*blue_led_on();
+            */
+            blue_led_toggle();
         }
     }
 }
 
 void task_test1(void *arg)
 {
-    uint32_t now = jiffies;
+    uint32_t now = millis();
     red_led_on();
     while(1) {
-        if ((jiffies - now) > 1000) {
-            red_led_off();
+        if ((millis() - now) > 1000) {
+            /*red_led_off();
             schedule();
-            now = jiffies;
+            now = millis;
             red_led_on();
+            */
+            red_led_toggle();
         }
     }
 }
 
 
 int main() {
-  Systick_Init(SystemCoreClock/1000);
-
+  /*uint32_t * stack_end = &_os_stack_stop;*/
+  SysTick_Init(SystemCoreClock/1000);
     /* Enable Clock */
   RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
 
@@ -98,10 +115,17 @@ int main() {
   kernel.id = 0;
   kernel.state = TASK_RUNNING;
   task_create("test0",task_test0,NULL);
-  task_create("test1",task_test1,NULL);
+  /*task_create("test1",task_test1,NULL);
   while(1){
     schedule();
   }
+  */
+
+  /* Infinite loop */
+  while (1)
+  {
+  }
+
 
   return 0;
 }

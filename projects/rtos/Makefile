@@ -29,7 +29,7 @@ DEPENDECY = -MMD
 
 # Additional DEBUG Flag
 OPT = -O3
-DEBUG_FLAG = -Wall -Wno-unused -Wextra -pedantic
+DEBUG_FLAG = -Wall -Wno-unused -Wextra -pedantic -Werror
 
 # -H print the recursive searh path
 # -M prints which headerfiles was included

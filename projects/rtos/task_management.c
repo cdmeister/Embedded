@@ -4,10 +4,9 @@
 extern void Default_Handler(void);
 
 struct task_block TASKS[MAX_TASKS];
-n_tasks = 1;
+int n_tasks = 1;
 
-running_task_id = 0;
-#define kernel TASKS[0]
+int running_task_id = 0;
 
 
 void task_stack_init(struct task_block *t){

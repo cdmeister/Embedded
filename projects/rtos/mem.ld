@@ -25,7 +25,7 @@ SECTIONS {
     */
     KEEP(*(.isr_vector))
      . = ALIGN(4);
-  } > FLASH = 0xEE
+  } > FLASH
 
   /* Text section (code and read-only data)*/
   .text : {
@@ -78,7 +78,7 @@ SECTIONS {
 }
 
 PROVIDE(_end_heap = ORIGIN(RAM) + LENGTH(RAM));
-PROVIDE(_os_stack_start = ORIGIN(CCMRAM) + LENGTH(CCMRAM));
+PROVIDE(_os_stack_start = ORIGIN(CCMRAM));
 PROVIDE(_os_stack_stop = ORIGIN(CCMRAM) + LENGTH(CCMRAM));
 /*
  * Necessary group so the newlib stubs provided in the library,
