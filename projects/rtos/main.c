@@ -14,16 +14,17 @@ extern struct task_block TASKS[MAX_TASKS];
 void task_test0(void *arg)
 {
     uint32_t now = millis();
-    /*blue_led_on();*/
+    blue_led_on();
     while(1) {
         if ((millis() - now) > 1000) {
 
-            /*blue_led_off();
-            schedule();*/
+            blue_led_off();
+            /*schedule();*/
+            wub();
             now = millis();
-            /*blue_led_on();
-            */
-            blue_led_toggle();
+            blue_led_on();
+
+            /*blue_led_toggle();*/
         }
     }
 }
@@ -34,12 +35,13 @@ void task_test1(void *arg)
     red_led_on();
     while(1) {
         if ((millis() - now) > 1000) {
-            /*red_led_off();
-            schedule();
-            now = millis;
+            red_led_off();
+            /*schedule();*/
+            wub();
+            now = millis();
             red_led_on();
-            */
-            red_led_toggle();
+
+            /*red_led_toggle();*/
         }
     }
 }
@@ -53,17 +55,11 @@ int main() {
   kernel.id = 0;
   kernel.state = TASK_RUNNING;
   task_create("test0",task_test0,NULL);
-  /*task_create("test1",task_test1,NULL);
+  task_create("test1",task_test1,NULL);
   while(1){
-    schedule();
+    wub();
+    /*schedule();*/
   }
-  */
-
-  /* Infinite loop */
-  while (1)
-  {
-  }
-
 
   return 0;
 }

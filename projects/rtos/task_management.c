@@ -35,7 +35,7 @@ struct task_block * task_create(char * name, void (*start)(void *arg),
   t->state = TASK_READY;
   t->start = start;
   t->arg = arg;
-  t->sp = ((&_os_stack_start)+n_tasks*STACK_SIZE);
+  t->sp =(uint8_t *) ((&_os_stack_start)+n_tasks*STACK_SIZE);
   task_stack_init(t);
   return t;
 }

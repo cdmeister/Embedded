@@ -8,9 +8,10 @@ void schedule(){
   SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
 }
 
-
-
-void PendSV_Handler(void){
+/* need naked to prevent prologue and epiloge code interacting with the
+ * stack pointers and such
+ */
+void __attribute__((naked)) PendSV_Handler(void){
 
     store_context();
     __asm__ volatile("mrs %0, msp" : "=r"(TASKS[running_task_id].sp));
