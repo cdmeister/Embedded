@@ -1,1 +1,1 @@
-this is trying to make everything from scratch. Makefile,linker script, startup script and some assembly code
+Using bare_metal approch to make a simple RTOS as a learning tool
