@@ -14,7 +14,6 @@ extern struct task_block TASKS[MAX_TASKS];
 void task_test0(void *arg)
 {
     uint32_t now = milliseconds;/*millis();*/
-    __asm__ volatile("bkpt 1");
     blue_led_on();
     while(1) {
         if ((milliseconds - now) > 500 ){
