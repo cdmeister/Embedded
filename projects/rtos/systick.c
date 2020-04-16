@@ -1,12 +1,18 @@
 #include "systick.h"
+#include "scheduler.h"
 
+#define TIMESLICE (20)
 /* SysTick System Handler */
 void SysTick_Handler(void){
   /* TimeDelay is a global variable delcared as volatile */
   milliseconds++;
+  if((milliseconds % TIMESLICE) == 0){
+    schedule();
+  }
   if (TimeDelay >0)         /* Prevent it from being negative*/
     TimeDelay--;            /* TimeDelay is global volatile variable */
 }
+
 
 void Delay(uint32_t nTime){
   /* nTime: specifies the delay time Length */
@@ -30,7 +36,9 @@ void SysTick_Init (uint32_t ticks){
   /* Set interrupt priority of SysTick*/
   /* Make SysTick Least urgent(i.ie., highest priority number) */
   /* __NVIC_PRIO_BITS: number of bits for priority levels, defined in CMSIS */
-  NVIC_SetPriority(SysTick_IRQn, (1<<__NVIC_PRIO_BITS) -1);
+  NVIC_SetPriority(SysTick_IRQn, 0);
+  /* Set the lowest Priority for PendSV interrupt */
+  NVIC_SetPriority(PendSV_IRQn, (1<<__NVIC_PRIO_BITS) -1);
 
   /* Reset the SysTick counter value*/
   SysTick->VAL = 0;
