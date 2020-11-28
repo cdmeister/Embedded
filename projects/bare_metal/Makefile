@@ -4,13 +4,37 @@ TARGET = bare_metal
 # DEBUG
 DEBUG = 1
 
-# Build Directory
+# Directories
+LSCRIPT_DIR= linker
 BUILD_DIR = build
-SRC_DIR  = .
-SRC_FILES = $(wildcard $(SRC_DIR)/*.c)
-OBJ_FILES = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC_FILES))
+HAL_DIR = hal
+MEM_MGT_DIR = mem_mgt
+MU_DIR = mu
+STARTUP_DIR = startup
+VEC_TABLE_DIR = vector_table
+SRC_FILES = $(wildcard  *.c) \
+						$(wildcard $(HAL_DIR)/*.c) \
+						$(wildcard $(MEM_MGT_DIR)/*.c) \
+						$(wildcard $(MU_DIR)/*.c) \
+						$(wildcard $(STARTUP_DIR)/*.c) \
+						$(wildcard $(VEC_TABLE_DIR)/*.c)
+
+# Strip the ./ with ./%=% to produce object files
+OBJ_FILES = $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC_FILES))
+BUILD_FILES = $(OBJ_FILE)
+DEP_FILES = $(OBJ_FILES:.o=.d)
 $(info SRC_FILES is $(SRC_FILES))
 $(info OBJ_FILES is $(OBJ_FILES))
+$(info BUILD_FILES is $(OBJ_FILES))
+$(info DEP_FILES is $(DEP_FILES))
+
+#Include Directories
+INC_DIR = I$(HAL_DIR)/include \
+					-I$(LSCRIPT_DIR) \
+					-I$(MU_DIR) \
+					-I$(STARTUP_DIR)
+
+$(info INC_DIR is $(INC_DIR))
 
 # Tools to use
 CROSS_COMPILE = arm-none-eabi-
@@ -41,12 +65,14 @@ endif
 # Compiler Flags
 #CFLAGS += -ffreestanding
 CFLAGS += $(MCU) $(DEBUG_FLAG) $(OPT) $(GCC_STANDARD) $(DEPENDECY)\
+					-$(INC_DIR) \
 					-ffreestanding -ffunction-sections -nostdlib \
 					-fdata-sections
 
 
 # Linker Script
-LSCRIPT=mem.ld
+LSCRIPT=$(LSCRIPT_DIR)/mem.ld
+$(info Linker is $(LSCRIPT))
 
 # Libs for Linker
 # gonna use -nostdlib and pick and choose desired libs
@@ -66,8 +92,8 @@ $(TARGET).bin: $(TARGET).elf | $(BUILD_DIR)
 $(TARGET).elf: $(OBJ_FILES) | $(BUILD_DIR)
 	$(LD)  $(LDFLAGS) -o $@ $^
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
-	$(CC) $(CFLAGS)  -c -o $@ $<
+$(BUILD_FILES)/%.o: $(SRC_FILES) | $(BUILD_DIR)
+	$(CC) $(CFLAGS)  -c $< -o $@
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -84,8 +110,11 @@ $(BUILD_DIR):
 #	$(CC) $(CFLAGS) -c main.c
 
 
-.PHONY: clean nuke
--include $(OBJ_FILES:.o=.d)
+.PHONY: clean nuke list
+-include $(DEP_FILES)
+
+list:
+	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 
 make nuke:
 	-rm -rf *.o *.d *.elf *.bin *.hex *.map $(BUILD_DIR)
