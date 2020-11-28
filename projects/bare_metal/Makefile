@@ -49,6 +49,7 @@ CROSS_COMPILE = arm-none-eabi-
 CC = $(CROSS_COMPILE)gcc
 LD = $(CROSS_COMPILE)gcc
 CP = $(CROSS_COMPILE)objcopy
+SZ = $(CROSS_COMPILE)size
 
 
 # GCC FLAGS
@@ -105,6 +106,7 @@ $(BUILD_DIR)/$(TARGET).bin: $(BUILD_DIR)/$(TARGET).elf | directories
 
 $(BUILD_DIR)/$(TARGET).elf: $(OBJ_FILES) | directories
 	$(LD)  $(LDFLAGS) -o $@ $^
+	$(SZ) $@
 
 
 $(BUILD_DIR)/%.o: %.c | directories
