@@ -12,27 +12,35 @@ MEM_MGT_DIR = mem_mgt
 MU_DIR = mu
 STARTUP_DIR = startup
 VEC_TABLE_DIR = vector_table
-SRC_FILES = $(wildcard  *.c) \
+
+SRC_FILES := $(wildcard  *.c) \
 						$(wildcard $(HAL_DIR)/*.c) \
 						$(wildcard $(MEM_MGT_DIR)/*.c) \
 						$(wildcard $(MU_DIR)/*.c) \
 						$(wildcard $(STARTUP_DIR)/*.c) \
 						$(wildcard $(VEC_TABLE_DIR)/*.c)
 
-# Strip the ./ with ./%=% to produce object files
-OBJ_FILES = $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC_FILES))
-BUILD_FILES = $(OBJ_FILE)
-DEP_FILES = $(OBJ_FILES:.o=.d)
+SRC_DIRS := $(dir $(SRC_FILES))
+OBJ_FILES := $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC_FILES))
+OBJ_DIRS := $(dir $(OBJ_FILES))
+
+#VPATH := $(SRC_DIRS)
+
 $(info SRC_FILES is $(SRC_FILES))
+$(info SRC_DIRS is $(SRC_DIRS))
 $(info OBJ_FILES is $(OBJ_FILES))
-$(info BUILD_FILES is $(OBJ_FILES))
-$(info DEP_FILES is $(DEP_FILES))
+$(info OBJ_DIRS is $(OBJ_DIRS))
+
+#Directory stuff
+MKDIR_P := mkdir -p
+
 
 #Include Directories
 INC_DIR = I$(HAL_DIR)/include \
 					-I$(LSCRIPT_DIR) \
 					-I$(MU_DIR) \
-					-I$(STARTUP_DIR)
+					-I$(STARTUP_DIR) \
+					-I$(MEM_MGT_DIR)
 
 $(info INC_DIR is $(INC_DIR))
 
@@ -81,40 +89,31 @@ LIBS = -lc
 # Linker Flags
 LDFLAGS = -T$(LSCRIPT)  $(MCU) -nostdlib $(LIBS) -Wl,-Map=map.map -Wl,--cref -Wl,--gc-sections
 
-# Objs
-#OBJ = startup.o
 
-all: $(TARGET).bin
+.PHONY: clean nuke list all directories
 
-$(TARGET).bin: $(TARGET).elf | $(BUILD_DIR)
-	$(CP) -O binary $< $@
+all: $(BUILD_DIR)/$(TARGET).bin
 
-$(TARGET).elf: $(OBJ_FILES) | $(BUILD_DIR)
-	$(LD)  $(LDFLAGS) -o $@ $^
-
-$(BUILD_FILES)/%.o: $(SRC_FILES) | $(BUILD_DIR)
-	$(CC) $(CFLAGS)  -c $< -o $@
+directories: $(BUILD_DIR)
 
 $(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
-#startup.o: startup.c
-	#$(CC) $(CFLAGS) -c startup.c
-
-#vector_table.o: vector_table.c
-	#$(CC) $(CFLAGS) -c vector_table.c
-
-#dynamic_memory.o: dynamic_memory.c
-#	$(CC) $(CFLAGS) -c dynamic_memory.c
-
-#main.o: main.c
-#	$(CC) $(CFLAGS) -c main.c
+	${MKDIR_P} $(OBJ_DIRS)
 
 
-.PHONY: clean nuke list
--include $(DEP_FILES)
+$(BUILD_DIR)/$(TARGET).bin: $(BUILD_DIR)/$(TARGET).elf | directories
+	$(CP) -O binary $< $@
+
+$(BUILD_DIR)/$(TARGET).elf: $(OBJ_FILES) | directories
+	$(LD)  $(LDFLAGS) -o $@ $^
+
+
+$(BUILD_DIR)/%.o: %.c | directories
+	$(CC) $(CFLAGS)  -c $< -o $@
+
+-include $(OBJ_FILES:.o=.d)
 
 list:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
 
-make nuke:
+nuke:
 	-rm -rf *.o *.d *.elf *.bin *.hex *.map $(BUILD_DIR)
