@@ -5,20 +5,20 @@ TARGET = bare_metal
 DEBUG = 1
 
 # Directories
-LSCRIPT_DIR= linker
 BUILD_DIR = build
-HAL_DIR = hal
-MEM_MGT_DIR = mem_mgt
-MU_DIR = mu
-STARTUP_DIR = startup
-VEC_TABLE_DIR = vector_table
+SRC_BASE_DIR = src
+HAL_DIR = $(SRC_BASE_DIR)/hal
+MEM_MGT_DIR = $(SRC_BASE_DIR)/mem_mgt
+MU_BASE_DIR = mu
+STARTUP_DIR = $(MU_BASE_DIR)/startup
+LSCRIPT_DIR := $(MU_BASE_DIR)/linker
 
 SRC_FILES := $(wildcard  *.c) \
-						$(wildcard $(HAL_DIR)/*.c) \
-						$(wildcard $(MEM_MGT_DIR)/*.c) \
-						$(wildcard $(MU_DIR)/*.c) \
+						$(wildcard $(MU_BASE_DIR)/*.c) \
 						$(wildcard $(STARTUP_DIR)/*.c) \
-						$(wildcard $(VEC_TABLE_DIR)/*.c)
+						$(wildcard $(SRC_BASE_DIR)/*.c) \
+						$(wildcard $(MEM_MGT_DIR)/*.c) \
+						$(wildcard $(HAL_DIR)/*.c)
 
 SRC_DIRS := $(dir $(SRC_FILES))
 OBJ_FILES := $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC_FILES))
@@ -38,7 +38,7 @@ MKDIR_P := mkdir -p
 #Include Directories
 INC_DIR = I$(HAL_DIR)/include \
 					-I$(LSCRIPT_DIR) \
-					-I$(MU_DIR) \
+					-I$(MU_BASE_DIR) \
 					-I$(STARTUP_DIR) \
 					-I$(MEM_MGT_DIR)
 
@@ -88,7 +88,7 @@ $(info Linker is $(LSCRIPT))
 # -lc has malloc but need to implement _sbrk
 LIBS = -lc
 # Linker Flags
-LDFLAGS = -T$(LSCRIPT)  $(MCU) -nostdlib $(LIBS) -Wl,-Map=map.map -Wl,--cref -Wl,--gc-sections
+LDFLAGS = -T$(LSCRIPT)  $(MCU) -nostdlib $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map -Wl,--cref -Wl,--gc-sections
 
 
 .PHONY: clean nuke list all directories
