@@ -57,7 +57,7 @@ void TIM4_IRQHandler(void){
 }
 uint32_t timer_init(void){
 
-  uint32_t TIM4COUNTER_Frequency = 100000; /*Desired Frequency */
+  uint32_t TIM4COUNTER_Frequency = 50; /*Desired Frequency */
 
   /* Enable Timer 4 clock */
   RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;
@@ -73,11 +73,11 @@ uint32_t timer_init(void){
   TIM4->CR1 |=(TIM_CR1_ARPE);
 
   /*Clock Prescaler */
-  TIM4->PSC = (84000000/TIM4COUNTER_Frequency)-1;
+  TIM4->PSC = 83;
   /*TIM4->PSC = 62499; */
 
   /*Auto Reload: up-counting (0-> ARR), down-counting (ARR -> 0) */
-  TIM4->ARR = .01 * 100000-1;
+  TIM4->ARR = 19999;
   /*TIM4->ARR = 1343; */
 
   /* ------------------Channel 2 Setup ---------------------------------- */
@@ -284,18 +284,10 @@ int main(void)
    /* GPIOD->ODR ^=PORTD_14; */
    /* GPIOD->ODR ^=PORTD_15; */
     /*Delay(500); */
-    int i=0;
-    for(;i<max_brightness;i+=1){
-      TIM4->CCR4=i;
-      TIM4->CCR3=i;
-      Delay(1);
-    }
-    for(;i>0;i-=1){
-      TIM4->CCR4=i;
-      TIM4->CCR3=i;
-      Delay(1);
-    }
-
+    TIM4->CCR4=900;
+    Delay(1500);
+    TIM4->CCR4=2100;
+    Delay(1500);
 
   }
   return 0;
