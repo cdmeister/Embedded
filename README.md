@@ -5,6 +5,9 @@ This is a simple repo of various different projects working with the STM32F4 dis
 
 ## Project Layout
 - 'docs' : pdfs/documentation/ref docs
+- 'mu' : any files related to booting up the STM32F4, linker script, startup code, vector table, etc
+- 'src' : implementation of the microcontroller features
+- 'device' : src code for any external IC, L293D, etc...
 - 'projects' : different projects for the STM32F4 that are self-contained
 - 'Ancient' : old projects no longer maintained, but still a usefull reference.
   - 'devices': contains any code related to particular devices or IC
@@ -33,10 +36,17 @@ files will be house in the [Ancient](Ancient) folder.
 - [Temerature Readout](Ancient/projects/temp_lcd) : reading from temperature sensor via ADC and output to character LCD
 
 ### Bare Metal Projects
-These types of projects uses the homegrown bare metal related files as a base
-of each project. All Bare Metal projects are self contain. Meaning, all files that
-are needed are within the folder. Every new project will just copy the [Bare_Metal](projects/bare_metal) folder and rename it.
+These types of projects uses the homegrown bare metal related files as a base of each project([Mainly the mu folder](mu)).
+Common code in the main directory will use common code.
+
+Couple of projects in the [projects folder](projects) are self contain that use bare metal files for learning purposes but rest of projects
+share common code.
+
+If you need a self contained project, just copy the [Bare_Metal](projects/bare_metal) folder and rename it. Edit the makefile to tap into common code or copy it over to the bare metal folder if needed.
+
+If you want to use common code then just copy the [Servo](projects/servo) and have fun.
 
 #### Current list of Bare Metal Projects
-- [Bare Metal](projects/bare_metal) : create startup, linker script, makefile using bare essential from scratch
-- [RTOS](projects/rtos) : simple operating system as a self learning tool
+- [Bare Metal](projects/bare_metal) : create startup, linker script, makefile using bare essential from scratch, self contained
+- [RTOS](projects/rtos) : simple operating system as a self learning tool, self contained
+- [Servo](projects/servo) : using TIM4 to create a 50hz pwm signal to control a simple servo on PD15. Small tweaks can use to control onboard brightness LED.
