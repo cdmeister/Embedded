@@ -2,9 +2,8 @@
 #define __SCHEDULER_
 
 #include "stm32f407xx.h"
-#define wub() SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
-
 /* Calls the PENDSV ISR */
-void schedule(void);
+#define schedule() SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
+
 
 #endif /*__SCHEDULER_*/

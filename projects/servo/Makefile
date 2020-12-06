@@ -1,30 +1,32 @@
 # Target name of final executable
-TARGET = bare_metal
+TARGET = servo
 
 # DEBUG
 DEBUG = 1
 
 # Directories
 BUILD_DIR = build
-SRC_BASE_DIR = src
+SRC_BASE_DIR = ../../src
 HAL_DIR = $(SRC_BASE_DIR)/hal
 MEM_MGT_DIR = $(SRC_BASE_DIR)/mem_mgt
-MU_BASE_DIR = mu
+MU_BASE_DIR = ../../mu
 STARTUP_DIR = $(MU_BASE_DIR)/startup
 LSCRIPT_DIR := $(MU_BASE_DIR)/linker
+DEVICE_DIR = ../../device
 
 SRC_FILES := $(wildcard  *.c) \
 						$(wildcard $(MU_BASE_DIR)/*.c) \
 						$(wildcard $(STARTUP_DIR)/*.c) \
 						$(wildcard $(SRC_BASE_DIR)/*.c) \
 						$(wildcard $(MEM_MGT_DIR)/*.c) \
-						$(wildcard $(HAL_DIR)/*.c)
+						$(wildcard $(HAL_DIR)/*.c) \
+						$(wildcard $(DEVICE_DIR)/*.c)
 
 SRC_DIRS := $(dir $(SRC_FILES))
-OBJ_FILES := $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC_FILES))
-OBJ_DIRS := $(dir $(OBJ_FILES))
+OBJ_FILES := $(subst ../../,,$(patsubst %.c,$(BUILD_DIR)/%.o,$(notdir $(SRC_FILES))))
+OBJ_DIRS := $(subst ../../,, $(dir $(OBJ_FILES)))
 
-#VPATH := $(SRC_DIRS)
+VPATH := $(SRC_DIRS)
 
 $(info SRC_FILES is $(SRC_FILES))
 $(info SRC_DIRS is $(SRC_DIRS))
@@ -98,7 +100,7 @@ all: $(BUILD_DIR)/$(TARGET).bin
 directories: $(BUILD_DIR)
 
 $(BUILD_DIR):
-	${MKDIR_P} $(OBJ_DIRS)
+	${MKDIR_P} $(BUILD_DIR)
 
 
 $(BUILD_DIR)/$(TARGET).bin: $(BUILD_DIR)/$(TARGET).elf | directories
