@@ -177,7 +177,7 @@ void USART2_IRQHandler(void){
   }
   */
 
-struct buf_st *p;
+   struct buf_st *p;
    p = &tbuf;
       if (p->in != p->out) {
         USART2->DR = (p->buf [p->out & (TBUF_SIZE-1)] & 0x1FF);
