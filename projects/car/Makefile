@@ -33,6 +33,7 @@ MKDIR_P := mkdir -p
 
 #Include Directories
 HAL_DIR = $(SRC_BASE_DIR)/hal
+DEBUG_DIR = $(SRC_BASE_DIR)/debug
 MEM_MGT_DIR = $(SRC_BASE_DIR)/mem_mgt
 STARTUP_DIR = $(MU_BASE_DIR)/startup
 INC_DIR =  I./ \
@@ -41,6 +42,7 @@ INC_DIR =  I./ \
 					-I$(MU_BASE_DIR) \
 					-I$(STARTUP_DIR) \
 					-I$(MEM_MGT_DIR) \
+					-I$(DEBUG_DIR)/include\
 					-I$(DEVICES_BASE_DIR)
 
 $(info INC_DIR is $(INC_DIR))
