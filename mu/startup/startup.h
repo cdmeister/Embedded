@@ -1,8 +1,6 @@
 #ifndef __STARTUP_H
 #define __STARTUP_H
 
-#include "stdlib.h"
-#include "string.h"
 #include "linker_defines.h"
 #include "stm32f407xx.h"
 

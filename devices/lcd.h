@@ -118,7 +118,7 @@ void LCD_noAutoscroll(LCD * LCDx);
 void LCD_setCursor(LCD * LCDx, uint8_t col, uint8_t row);
 
 
-__inline void LCD_setRowOffsets(LCD * LCDx, int row1,
+void LCD_setRowOffsets(LCD * LCDx, int row1,
                               int row2, int row3, int row4);
 /* void LCD_createChar(uint8_t, uint8_t[]); */
 void LCD_write(LCD * LCDx, uint8_t data);

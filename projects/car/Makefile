@@ -36,12 +36,14 @@ HAL_DIR = $(SRC_BASE_DIR)/hal
 DEBUG_DIR = $(SRC_BASE_DIR)/debug
 MEM_MGT_DIR = $(SRC_BASE_DIR)/mem_mgt
 STARTUP_DIR = $(MU_BASE_DIR)/startup
+CMSIS_DIR = $(MU_BASE_DIR)/CMSIS
 INC_DIR =  I./ \
           -I$(HAL_DIR)/include \
 					-I$(LSCRIPT_DIR) \
 					-I$(MU_BASE_DIR) \
 					-I$(STARTUP_DIR) \
 					-I$(MEM_MGT_DIR) \
+					-I$(CMSIS_DIR)   \
 					-I$(DEBUG_DIR)/include\
 					-I$(DEVICES_BASE_DIR)
 
@@ -60,7 +62,7 @@ CPU = -mcpu=cortex-m4
 FPU = -mfpu=fpv4-sp-d16
 FLOAT-ABI = -mfloat-abi=hard
 MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
-GCC_STANDARD = -std=c90
+GCC_STANDARD = -std=c99
 DEPENDECY = -MMD
 
 # Additional DEBUG Flag
@@ -71,7 +73,7 @@ DEBUG_FLAG = -Wall -Wno-unused -Wextra -pedantic
 # -M prints which headerfiles was included
 ifeq ($(DEBUG), 1)
 OPT = -O0
-DEBUG_FLAG += -H -g3 -gdwarf-2
+DEBUG_FLAG += -H -g3 -gdwarf-2 -dM
 endif
 
 # Compiler Flags
