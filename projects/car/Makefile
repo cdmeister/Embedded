@@ -33,12 +33,14 @@ MKDIR_P := mkdir -p
 
 #Include Directories
 HAL_DIR = $(SRC_BASE_DIR)/hal
+ERROR_DIR = $(SRC_BASE_DIR)/error
 DEBUG_DIR = $(SRC_BASE_DIR)/debug
 MEM_MGT_DIR = $(SRC_BASE_DIR)/mem_mgt
 STARTUP_DIR = $(MU_BASE_DIR)/startup
 CMSIS_DIR = $(MU_BASE_DIR)/CMSIS
 INC_DIR =  I./ \
           -I$(HAL_DIR)/include \
+          -I$(ERROR_DIR)/include \
 					-I$(LSCRIPT_DIR) \
 					-I$(MU_BASE_DIR) \
 					-I$(STARTUP_DIR) \

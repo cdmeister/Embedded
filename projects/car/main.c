@@ -13,6 +13,7 @@
 #include "startup.h"
 #include "stm32f407xx.h"
 #include "lcd.h"
+#include "gpio.h"
 #include "pushbutton.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -39,76 +40,90 @@ int main(void)
        this is done through SystemInit() function which is called from startup
        file (startup_stm32f4xx.s) before to branch to application main.
        To reconfigure the default setting of SystemInit() function, refer to
-        system_stm32f4xx.c file
+        startup.c file
      */
   LCD rgb_lcd;
   SysTick_Init(SystemCoreClock/1000);
-  RCC->AHB1ENR |= (RCC_AHB1ENR_GPIODEN|RCC_AHB1ENR_GPIOCEN);
-    GPIOD->MODER &=~( GPIO_MODER_MODE15 | GPIO_MODER_MODE14
+  GPIO_ClockInit(GPIOD);
+  GPIO_ClockInit(GPIOC);
+  GPIO_Mode(GPIOD,
+                  /* Mask */
+                  ( GPIO_MODER_MODE15 | GPIO_MODER_MODE14
                   | GPIO_MODER_MODE13 | GPIO_MODER_MODE12
                   | GPIO_MODER_MODE10 | GPIO_MODER_MODE9
                   | GPIO_MODER_MODE8  | GPIO_MODER_MODE7
                   | GPIO_MODER_MODE6  | GPIO_MODER_MODE4
                   | GPIO_MODER_MODE3  | GPIO_MODER_MODE2
-                  | GPIO_MODER_MODE1  | GPIO_MODER_MODE0);
-
-  GPIOD->MODER |= ( GPIO_MODER_MODE15_0 |  GPIO_MODER_MODE14_0
+                  | GPIO_MODER_MODE1  | GPIO_MODER_MODE0),
+                  /* Value */
+                  ( GPIO_MODER_MODE15_0 |  GPIO_MODER_MODE14_0
                   | GPIO_MODER_MODE13_0 |  GPIO_MODER_MODE12_0
                   | GPIO_MODER_MODE10_0 | GPIO_MODER_MODE9_0
                   | GPIO_MODER_MODE8_0  | GPIO_MODER_MODE7_0
                   | GPIO_MODER_MODE6_0  |  GPIO_MODER_MODE4_0
                   | GPIO_MODER_MODE3_0  |  GPIO_MODER_MODE2_0
-									| GPIO_MODER_MODE1_0 | GPIO_MODER_MODE0_0);
+									| GPIO_MODER_MODE1_0 | GPIO_MODER_MODE0_0));
 
-  GPIOC->MODER &=~(GPIO_MODER_MODE1);
-  GPIOC->MODER |= (GPIO_MODER_MODE1_0|GPIO_MODER_MODE1_1);
+  GPIO_Mode(GPIOC, GPIO_MODER_MODE1, (GPIO_MODER_MODE1_0|GPIO_MODER_MODE1_1));
 
-
-
-  GPIOD->OTYPER &= ~( GPIO_OTYPER_OT15 | GPIO_OTYPER_OT14
+  GPIO_OTyper(GPIOD,/* Mask */
+                    ( GPIO_OTYPER_OT15 | GPIO_OTYPER_OT14
                     | GPIO_OTYPER_OT13 | GPIO_OTYPER_OT12
                     | GPIO_OTYPER_OT10 | GPIO_OTYPER_OT9
                     | GPIO_OTYPER_OT8  | GPIO_OTYPER_OT7
                     | GPIO_OTYPER_OT6  | GPIO_OTYPER_OT4
                     | GPIO_OTYPER_OT3  | GPIO_OTYPER_OT2
-                    | GPIO_OTYPER_OT1  | GPIO_OTYPER_OT0);
+                    | GPIO_OTYPER_OT1  | GPIO_OTYPER_OT0),
+                    /* Value */
+                    ~( GPIO_OTYPER_OT15 | GPIO_OTYPER_OT14
+                    | GPIO_OTYPER_OT13 | GPIO_OTYPER_OT12
+                    | GPIO_OTYPER_OT10 | GPIO_OTYPER_OT9
+                    | GPIO_OTYPER_OT8  | GPIO_OTYPER_OT7
+                    | GPIO_OTYPER_OT6  | GPIO_OTYPER_OT4
+                    | GPIO_OTYPER_OT3  | GPIO_OTYPER_OT2
+                    | GPIO_OTYPER_OT1  | GPIO_OTYPER_OT0));
 
 
-  GPIOC->OTYPER &= ~( GPIO_OTYPER_OT1);
+  GPIO_OTyper(GPIOC, GPIO_OTYPER_OT1, ~(GPIO_OTYPER_OT1));
 
-   GPIOD->OSPEEDR &=~( GPIO_OSPEEDR_OSPEED15 | GPIO_OSPEEDR_OSPEED14
+  GPIO_OSpeedr(GPIOD,/* Mask */
+                    ( GPIO_OSPEEDR_OSPEED15 | GPIO_OSPEEDR_OSPEED14
                     | GPIO_OSPEEDR_OSPEED13 | GPIO_OSPEEDR_OSPEED12
                     | GPIO_OSPEEDR_OSPEED10 | GPIO_OSPEEDR_OSPEED9
                     | GPIO_OSPEEDR_OSPEED8  | GPIO_OSPEEDR_OSPEED7
                     | GPIO_OSPEEDR_OSPEED6  | GPIO_OSPEEDR_OSPEED4
                     | GPIO_OSPEEDR_OSPEED3  | GPIO_OSPEEDR_OSPEED2
-                    | GPIO_OSPEEDR_OSPEED1  | GPIO_OSPEEDR_OSPEED0); /* Configure as high speed */
-
-  GPIOD->OSPEEDR |= ( GPIO_OSPEEDR_OSPEED15 | GPIO_OSPEEDR_OSPEED14
+                    | GPIO_OSPEEDR_OSPEED1  | GPIO_OSPEEDR_OSPEED0),
+                    /* Value */
+                    ( GPIO_OSPEEDR_OSPEED15 | GPIO_OSPEEDR_OSPEED14
                     | GPIO_OSPEEDR_OSPEED13 | GPIO_OSPEEDR_OSPEED12
                     | GPIO_OSPEEDR_OSPEED10 | GPIO_OSPEEDR_OSPEED9
                     | GPIO_OSPEEDR_OSPEED8  | GPIO_OSPEEDR_OSPEED7
                     | GPIO_OSPEEDR_OSPEED6  | GPIO_OSPEEDR_OSPEED4
                     | GPIO_OSPEEDR_OSPEED3  | GPIO_OSPEEDR_OSPEED2
-                    | GPIO_OSPEEDR_OSPEED1  | GPIO_OSPEEDR_OSPEED0); /* Configure as high speed */
+                    | GPIO_OSPEEDR_OSPEED1  | GPIO_OSPEEDR_OSPEED0)); /* Configure as high speed */
 
 
-  GPIOC->OSPEEDR &=~(GPIO_OSPEEDR_OSPEED1); /* Configure as high speed */
+  GPIO_OSpeedr(GPIOC, GPIO_OSPEEDR_OSPEED1, GPIO_OSPEEDR_OSPEED1); /* Configure as high speed */
 
-  GPIOC->OSPEEDR |= (GPIO_OSPEEDR_OSPEED1); /* Configure as high speed */
-
-
-
-  GPIOD->PUPDR &= ~(GPIO_PUPDR_PUPD15 | GPIO_PUPDR_PUPD14
+  GPIO_Pupdr(GPIOD, /* Mask */
+                  (GPIO_PUPDR_PUPD15 | GPIO_PUPDR_PUPD14
                   | GPIO_PUPDR_PUPD13 | GPIO_PUPDR_PUPD12
                   | GPIO_PUPDR_PUPD10  | GPIO_PUPDR_PUPD9 /*no pul-up, no pull-down*/
                   | GPIO_PUPDR_PUPD8  | GPIO_PUPDR_PUPD7 /*no pul-up, no pull-down*/
                   | GPIO_PUPDR_PUPD6  | GPIO_PUPDR_PUPD4 /*no pul-up, no pull-down*/
                   | GPIO_PUPDR_PUPD3  | GPIO_PUPDR_PUPD2
-                  | GPIO_PUPDR_PUPD1  | GPIO_PUPDR_PUPD0);
+                  | GPIO_PUPDR_PUPD1  | GPIO_PUPDR_PUPD0),
+                  /* Value */
+                  ~(GPIO_PUPDR_PUPD15 | GPIO_PUPDR_PUPD14
+                  | GPIO_PUPDR_PUPD13 | GPIO_PUPDR_PUPD12
+                  | GPIO_PUPDR_PUPD10  | GPIO_PUPDR_PUPD9 /*no pul-up, no pull-down*/
+                  | GPIO_PUPDR_PUPD8  | GPIO_PUPDR_PUPD7 /*no pul-up, no pull-down*/
+                  | GPIO_PUPDR_PUPD6  | GPIO_PUPDR_PUPD4 /*no pul-up, no pull-down*/
+                  | GPIO_PUPDR_PUPD3  | GPIO_PUPDR_PUPD2
+                  | GPIO_PUPDR_PUPD1  | GPIO_PUPDR_PUPD0));
 
-
-  GPIOC->PUPDR &= ~(GPIO_PUPDR_PUPD1);
+  GPIO_Pupdr(GPIOC,GPIO_PUPDR_PUPD1, ~(GPIO_PUPDR_PUPD1));
 
 
   LCD_init(&rgb_lcd,GPIOD,0,0,1,2,3,4,6,7,8,9,10,4,20,LCD_8BITMODE,LCD_5x8DOTS);
@@ -122,8 +137,8 @@ int main(void)
     GPIOD->ODR ^=PORTD_13;
 
   LCD_print(&rgb_lcd, "Periphery Setup Complete %d", SystemCoreClock);
-    Delay(500);
-    GPIOD->ODR ^=PORTD_14;
+  Delay(500);
+  GPIOD->ODR ^=PORTD_14;
   Delay(1000);
 
   LCD_clear(&rgb_lcd);

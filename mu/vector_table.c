@@ -1,4 +1,5 @@
 #include "linker_defines.h"
+#include "systick.h"
 
 /* This file contains the vector table, weak definitions for ISR and
  * Defautl_Handler definition
@@ -215,6 +216,7 @@ void (* const vector_table[])(void) __attribute__((section(".isr_vector"))) = {
 /*----------------------------------------------------------------------------
   Default Handler for Exceptions / Interrupts
  *----------------------------------------------------------------------------*/
+
 void Default_Handler(void)
 {
   while(1);
