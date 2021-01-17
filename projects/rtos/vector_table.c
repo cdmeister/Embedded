@@ -1,4 +1,5 @@
 #include "linker_defines.h"
+#include "systick.h"
 
 /* This file contains the vector table, weak definitions for ISR and
  * Defautl_Handler definition
@@ -13,8 +14,8 @@
 * this definition.
 *
 *******************************************************************************/
-void __attribute__((noreturn,weak))  Default_Handler (void);
-void Reset_Handler(void) __attribute__((weak,noreturn,alias("Default_Handler")));
+void __attribute__((weak))  Default_Handler (void);
+void Reset_Handler(void) __attribute__((weak,alias("Default_Handler")));
 void NMI_Handler(void) __attribute__((weak, alias("Default_Handler")));
 void HardFault_Handler(void) __attribute__((weak,alias("Default_Handler")));
 void MemManage_Handler(void) __attribute__((weak,alias("Default_Handler")));
@@ -215,6 +216,7 @@ void (* const vector_table[])(void) __attribute__((section(".isr_vector"))) = {
 /*----------------------------------------------------------------------------
   Default Handler for Exceptions / Interrupts
  *----------------------------------------------------------------------------*/
+
 void Default_Handler(void)
 {
   while(1);

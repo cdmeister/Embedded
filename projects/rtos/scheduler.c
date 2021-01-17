@@ -4,6 +4,9 @@
 extern int running_task_id;
 extern struct task_block TASKS[MAX_TASKS];
 extern int n_tasks;
+volatile uint32_t TimeDelay = 0;
+volatile uint32_t milliseconds = 0;
+
 
 
 /* need naked to prevent prologue and epiloge code interacting with the

@@ -1,5 +1,9 @@
 #include "systick.h"
 
+volatile uint32_t TimeDelay = 0;
+volatile uint32_t milliseconds = 0;
+
+
 /* SysTick System Handler */
 void SysTick_Handler(void){
   /* TimeDelay is a global variable delcared as volatile */
