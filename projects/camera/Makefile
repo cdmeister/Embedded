@@ -1,0 +1,128 @@
+# Target name of final executable
+TARGET = camera
+
+# DEBUG
+DEBUG = 1
+
+# Directories
+BUILD_DIR = build
+SRC_BASE_DIR = ../../src
+MU_BASE_DIR = ../../mu
+DEVICES_BASE_DIR = ../../devices
+LSCRIPT_DIR := $(MU_BASE_DIR)/linker
+
+SRC_FILES := $(wildcard  *.c) \
+						$(shell find $(MU_BASE_DIR) -type f -name '*.c') \
+						$(shell find $(SRC_BASE_DIR) -type f -name '*.c') \
+						$(shell find $(DEVICES_BASE_DIR) -type f -name '*.c')
+
+SRC_DIRS := $(dir $(SRC_FILES))
+OBJ_FILES := $(subst ../../,,$(patsubst %.c,$(BUILD_DIR)/%.o,$(notdir $(SRC_FILES))))
+OBJ_DIRS := $(subst ../../,, $(dir $(OBJ_FILES)))
+
+VPATH := $(SRC_DIRS)
+
+$(info SRC_FILES is $(SRC_FILES))
+$(info SRC_DIRS is $(SRC_DIRS))
+$(info OBJ_FILES is $(OBJ_FILES))
+$(info OBJ_DIRS is $(OBJ_DIRS))
+
+#Directory stuff
+MKDIR_P := mkdir -p
+
+
+#Include Directories
+HAL_DIR = $(SRC_BASE_DIR)/hal
+ERROR_DIR = $(SRC_BASE_DIR)/error
+DEBUG_DIR = $(SRC_BASE_DIR)/debug
+MEM_MGT_DIR = $(SRC_BASE_DIR)/mem_mgt
+STARTUP_DIR = $(MU_BASE_DIR)/startup
+CMSIS_DIR = $(MU_BASE_DIR)/CMSIS
+INC_DIR =  I./ \
+          -I$(HAL_DIR)/include \
+          -I$(ERROR_DIR)/include \
+					-I$(LSCRIPT_DIR) \
+					-I$(MU_BASE_DIR) \
+					-I$(STARTUP_DIR) \
+					-I$(MEM_MGT_DIR) \
+					-I$(CMSIS_DIR)   \
+					-I$(DEBUG_DIR)/include\
+					-I$(DEVICES_BASE_DIR)
+
+$(info INC_DIR is $(INC_DIR))
+
+# Tools to use
+CROSS_COMPILE = arm-none-eabi-
+CC = $(CROSS_COMPILE)gcc
+LD = $(CROSS_COMPILE)gcc
+CP = $(CROSS_COMPILE)objcopy
+SZ = $(CROSS_COMPILE)size
+
+
+# GCC FLAGS
+CPU = -mcpu=cortex-m4
+FPU = -mfpu=fpv4-sp-d16
+FLOAT-ABI = -mfloat-abi=hard
+MCU = $(CPU) -mthumb $(FPU) $(FLOAT-ABI)
+GCC_STANDARD = -std=c99
+DEPENDECY = -MMD
+
+# Additional DEBUG Flag
+OPT = -O3
+DEBUG_FLAG = -Wall -Wno-unused -Wextra -pedantic
+
+# -H print the recursive searh path
+# -M prints which headerfiles was included
+ifeq ($(DEBUG), 1)
+OPT = -O0
+DEBUG_FLAG += -H -g3 -gdwarf-2 -dM
+endif
+
+# Compiler Flags
+#CFLAGS += -ffreestanding
+CFLAGS += $(MCU) $(DEBUG_FLAG) $(OPT) $(GCC_STANDARD) $(DEPENDECY)\
+					-$(INC_DIR) \
+					-ffreestanding -ffunction-sections -nostdlib \
+					-fdata-sections
+
+
+# Linker Script
+LSCRIPT=$(LSCRIPT_DIR)/mem.ld
+$(info Linker is $(LSCRIPT))
+
+# Libs for Linker
+# gonna use -nostdlib and pick and choose desired libs
+# -lc has malloc but need to implement _sbrk
+LIBS = -lc
+# Linker Flags
+LDFLAGS = -T$(LSCRIPT)  $(MCU) -nostdlib $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map -Wl,--cref -Wl,--gc-sections
+
+
+.PHONY: clean nuke list all directories
+
+all: $(BUILD_DIR)/$(TARGET).bin
+
+directories: $(BUILD_DIR)
+
+$(BUILD_DIR):
+	${MKDIR_P} $(BUILD_DIR)
+
+
+$(BUILD_DIR)/$(TARGET).bin: $(BUILD_DIR)/$(TARGET).elf | directories
+	$(CP) -O binary $< $@
+
+$(BUILD_DIR)/$(TARGET).elf: $(OBJ_FILES) | directories
+	$(LD)  $(LDFLAGS) -o $@ $^
+	$(SZ) $@
+
+
+$(BUILD_DIR)/%.o: %.c | directories
+	$(CC) $(CFLAGS)  -c $< -o $@
+
+-include $(OBJ_FILES:.o=.d)
+
+list:
+	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$'
+
+nuke:
+	-rm -rf *.o *.d *.elf *.bin *.hex *.map $(BUILD_DIR)
