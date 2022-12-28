@@ -48,7 +48,7 @@ SECTIONS {
 
   /* Used by the startup to initialize data */
   /* this contains the LMA of the data section */
-  _sidata=LOADADDR(.data);
+  _sidata = LOADADDR(.data);
 
   .data : ALIGN(4) {
     . = ALIGN(4);
